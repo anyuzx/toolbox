@@ -14,7 +14,7 @@ class LammpsLog:
             file_name = os.path.basename(fp)
             self.data[file_name] = read_log_file(fp)
 
-    def plot(self, file_name, section_index, foutname=None):
+    def plot(self, file_name, section_index=0, foutname=None):
         df = self.data[file_name][section_index]
         number_attribute = len(df.columns)
         if 'Step' not in df.columns:

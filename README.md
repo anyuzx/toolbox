@@ -2,9 +2,11 @@
 
 This is a collection of several scripts and modules I use in my daily research.
 
-## List
+-----
 
-### `contactmap`
+### MODULES
+
+#### `contactmap`
 
 To start to use this module
 
@@ -37,7 +39,26 @@ self.get_contact_prob(bin_method='linear')
 
 the calculated probability profile is retrieved by `cmap.contact_probability`.
 
-### `ergodic_metric.py`
+
+#### `LammpsLog`
+
+This module can be used to read Lammps Log file and plot the attributes respect to timestep. 
+
+```python
+import LammpsLog
+
+logfile = LammpsLog.LammpsLog('test1.log', 'test2.log', 'test3.log')
+logfile.plot('test1.log', section_index=0, foutname='test1_log.png')
+logfile.plot('test2.log', section_index=0, foutname='test2_log.png')
+```
+
+In the above code, given a series of Lammps log files. To plot the result, use method `plot` and specify which file you want to plot and output `.png` format image file. Sometimes log file may contains several parts of consecutive records. You can use `section_index` to specify which part you want to plot. Default value is 0.
+
+------
+
+### SCRIPTS
+
+#### `ergodic_metric.py`
 
 This script calculate the energy metric described in this [paper](http://journals.aps.org/pra/abstract/10.1103/PhysRevA.39.3563). The module takes four arguments: first data file, second data file, output file, start snapshot index.
 
@@ -47,7 +68,7 @@ python ergodic_metric.py data1.h5 data2.h5 output.txt 1000
 
 data file need to be `hdf5` format. `1000` means that calculation starts from snapshot #1000. 
 
-### `dump2hdf5.py`
+#### `dump2hdf5.py`
 
 This script convert normal Lammps custom file to [H5MD](http://nongnu.org/h5md/index.html) formatted file. It takes two arguments and several optional arguments
 

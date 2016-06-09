@@ -161,9 +161,9 @@ class contactmap:
         n = self.map.shape[0] # used to make plot aspect appropriate
         baroffset = (1.0/20.0) * (n/norm)
         barlength = 0.88 * baroffset
-        barwidth = 1.1*(1.0/norm)
+        barwidth = (1.0/norm)
         # plot encode state bar
-        ax.eventplot(encode_state_lst, colors=['lime', 'gray'],\
+        ax.eventplot(encode_state_lst, colors=['lime', 'red'],\
                      lineoffsets=[-baroffset*1.5 for i in range(len(encode_state_lst))], \
                      linewidth=barwidth, linelengths=barlength)
         # plot subcompartment bar
@@ -183,7 +183,7 @@ class contactmap:
             #cbar = fig.colorbar(img)
             #cbar.ax.set_yticklabels(['','',''])
         ax.text(1,1,self.chrom, horizontalalignment='right', verticalalignment='bottom', transform=ax.transAxes)
-        ax.text(0,1,'1.2kb resolution', horizontalalignment='left', verticalalignment='bottom', transform=ax.transAxes)
+        ax.text(0,1,'25kb resolution', horizontalalignment='left', verticalalignment='bottom', transform=ax.transAxes)
         plt.xticks([0, n/norm], ['{:.2f}Mb'.format(self.start/1000000.0), '{:.2f}Mb'.format(self.end/1000000.0)])
         plt.yticks([-2.0*baroffset, n/norm], ['', ''])
         plt.text(-0.04,0.97,r'$\mathrm{I}$', transform=ax.transAxes)

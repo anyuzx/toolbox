@@ -7,6 +7,8 @@ import matplotlib.colors as mcolors
 import _matrixnorm
 import pandas as pd
 import datetime
+import sys
+import os
 
 class contactmap:
     def __init__(self, chrom, start, end, bin_size):
@@ -16,7 +18,7 @@ class contactmap:
         self.PearsonCoeff_map = None
         self.zscore_map = None
         self.contact_probability = None
-        self.contact_probability0 = None
+        self.subchain_contact = None
         self.chrom = chrom
         self.start = start
         self.end = end
@@ -48,11 +50,9 @@ class contactmap:
             bin_lst = np.unique(np.int_(np.floor(np.exp(np.linspace(np.log(1),np.log(n-1),number_bins)))))
 
         contact_count = np.zeros(n-1)
-        self.contact_probability0 = np.zeros(n-1, dtype=np.float32)
         for i in range(n-1):
             for j in range(i+1, n):
                 contact_count[j-i-1] += self.map[i, j]
-                self.contact_probability0[j-i-1] += 1.0/(n-(j-i))
 
         norm_factor = np.arange(1,n)[::-1]
         contact_prob_temp = []
@@ -70,6 +70,23 @@ class contactmap:
         contact_prob_temp = contact_prob_temp/np.sum(contact_prob_temp)
         self.contact_probability = np.float32(np.column_stack((bin_lst, contact_prob_temp)))
         return self.contact_probability
+
+    def get_subchain_contact(self):
+        if self.map is None:
+            raise ValueError('No contact map present\n')
+
+        n = self.map.shape[0]
+        s_lst = np.arange(1, n+1)
+
+        self.subchain_contact = np.zeros(n, dtype=np.float32)
+        for i in range(n):
+            for j in range(i, n):
+                contact_part1 = np.sum(self.map[i:j+1, :i+1])
+                contact_part2 = np.sum(self.map[j:, i:j+1])
+                self.subchain_contact[j-i] += (contact_part1 + contact_part2)/(n-(j-i))
+
+        self.subchain_contact = np.float32(np.column_stack((s_lst, self.subchain_contact)))
+        return self.subchain_contact
 
     def normalize(self, norm_factor):
         self.norm_factor = norm_factor
@@ -105,16 +122,18 @@ class contactmap:
 
     def plot_map(self, fp, color_range=[0.0,1.0], mode=None, state_mode='two state'):
         try:
-            encode_state = get_state('wgEncodeBroadHmmGm12878HMM.bed', chrom=self.chrom,\
+            path = os.path.dirname(__file__)
+            encode_state = get_state(os.path.join(path, 'wgEncodeBroadHmmGm12878HMM.bed'), chrom=self.chrom,\
                                      start=self.start, end=self.end, bin_size=self.bin_size,\
                                      data_source='Encode_Chrom_State', \
                                      mode=state_mode)
-            subcompartment_state = get_state('GSE63525_GM12878_subcompartments.bed',\
+            subcompartment_state = get_state(os.path.join(path, 'GSE63525_GM12878_subcompartments.bed'),\
                                              chrom=self.chrom, start=self.start, \
                                              end=self.end, bin_size=self.bin_size,\
                                              data_source='Cell_Subcompartment')
         except IOError:
             sys.stdout.write('Could not find EncodeHMM bed file and Subcompartment bed file\n')
+            sys.exit(0)
 
         if mode is None:
             mode_flag = 1
@@ -193,19 +212,40 @@ class contactmap:
         else:
             plt.savefig(fp+'.png', dpi=300)
 
-    def plot_ps(self):
+    def plot_ps(self, foutname=None, guide=False):
         if self.contact_probability is None:
             raise ValueError('No contact probability profile available. Please \
                              first run method get_contact_prob\n')
 
+        x_fit = self.contact_probability[:, 0]*self.bin_size/2.0
+        ymax = self.contact_probability[:, 1].max()
+        y_fit1 = np.power(x_fit, -1.0)
+        y_fit2 = np.power(x_fit, -0.75)
+        y_fit3 = np.power(x_fit, -1.2)
+
+        y_fit1 = (ymax/y_fit1.max())*y_fit1
+        y_fit2 = (ymax/y_fit2.max())*y_fit2
+        y_fit3 = (ymax/y_fit3.max())*y_fit3
+
         fig, ax = plt.subplots()
         ax.set_xscale('log')
         ax.set_yscale('log')
-        ax.plot((self.contact_probability[:-1,0]+self.contact_probability[1:,0])*self.bin_size/2.0, \
-                self.contact_probability[:,1])
+        ax.plot(self.contact_probability[:, 0]*self.bin_size/2.0, \
+                self.contact_probability[:, 1])
+        if guide:
+            ax.plot(x_fit, y_fit1, label=r'$\sim s^{-1}$')
+            ax.plot(x_fit, y_fit2, label=r'$\sim s^{-0.75}$')
+            ax.plot(x_fit, y_fit3, label=r'$\sim s^{-1.2}$')
+            plt.legend(loc='upper right')
         ax.set_xlabel('genome distance(bps)')
         ax.set_ylabel('relative contact frequency')
-        plt.show()
+        if foutname is None:
+            plt.show()
+        else:
+            if '.png' in foutname:
+                plt.savefig(foutname)
+            else:
+                plt.savefig(foutname+'.png')
 
     def write_ps(self, fp):
         if self.contact_probability is None:

@@ -85,3 +85,21 @@ def matrixnorm_correlation(np.ndarray[DTYPE_t, ndim=2] cmap_OE):
                         pearson_coeff = (ij_mean - i_mean * j_mean)/(i_std * j_std)
                         coeff_matrix[i,j] = pearson_coeff
         return coeff_matrix
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def matrixnorm_subchain_contact(np.ndarray[DTYPE_t, ndim=2] cmap):
+        cdef int i, j, k, l
+        cdef int N = cmap.shape[0]
+        cdef DTYPE_t temp1, temp2
+
+        cdef np.ndarray[DTYPE_t, ndim=1] subchain_contact = np.zeros(N, dtype=DTYPE)
+        for i in xrange(N):
+                temp1 = 0.0
+                temp2 = 0.0
+                for j in xrange(i,N):
+                        temp1 += np.sum(cmap[j, :i+1])
+                        temp2 += np.sum(cmap[j:, j]) - np.sum(cmap[j, i:j+1])
+                        subchain_contact[j-i] += (temp1 + temp2)/(N-(j-i))
+
+        return subchain_contact

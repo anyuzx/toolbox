@@ -71,19 +71,32 @@ class contactmap:
         self.contact_probability = np.float32(np.column_stack((bin_lst, contact_prob_temp)))
         return self.contact_probability
 
-    def get_subchain_contact(self):
-        if self.map is None:
-            raise ValueError('No contact map present\n')
+    def get_subchain_contact(self, mode='normalize'):
+        if mode == 'normalize':
+            if self.normalized_map is None:
+                raise ValueError('No normalized contact map present\n')
+        else:
+            if self.map is None:
+                raise ValueError('No contact map present\n')
 
-        n = self.map.shape[0]
+        if mode == 'normalize':
+            n = self.normalized_map.shape[0]
+        else:
+            n = self.map.shape[0]
         s_lst = np.arange(1, n+1)
 
-        self.subchain_contact = np.zeros(n, dtype=np.float32)
-        for i in range(n):
-            for j in range(i, n):
-                contact_part1 = np.sum(self.map[i:j+1, :i+1])
-                contact_part2 = np.sum(self.map[j:, i:j+1])
-                self.subchain_contact[j-i] += (contact_part1 + contact_part2)/(n-(j-i))
+        if mode == 'normalize':
+            self.subchain_contact = _matrixnorm.matrixnorm_subchain_contact(self.normalized_map)
+        else:
+            self.subchain_contact = _matrixnorm.matrixnorm_subchain_contact(self.map)
+
+        #self.subchain_contact = np.zeros(n, dtype=np.float32)
+        #for i in range(n):
+        #    for j in range(i, n):
+        #        sys.stdout.write('\rindex ({},{})'.format(i,j))
+        #        contact_part1 = np.sum(self.map[i:j+1, :i+1])
+        #        contact_part2 = np.sum(self.map[j:, i:j+1])
+        #        self.subchain_contact[j-i] += (contact_part1 + contact_part2)/(n-(j-i))
 
         self.subchain_contact = np.float32(np.column_stack((s_lst, self.subchain_contact)))
         return self.subchain_contact
@@ -99,7 +112,6 @@ class contactmap:
         self.norm_factor_OE = norm_factor
         assert type(norm_factor) == int
         self.OE_map = _matrixnorm.matrixnorm_OE(self.map, norm_factor)
-        #self.OE_map = _matrixnorm.matrixnorm_zscore(self.map, norm_factor)
         self.OE_map += self.OE_map.T - np.diag(self.OE_map.diagonal())
         return self.OE_map
 

@@ -16,9 +16,12 @@ def str2array(str):
 position_flag = False
 velocity_flag = False
 others_flag = True
+unwrap_flag = False
+image_flag = False
 
 # First declare several flags
-parser = argparse.ArgumentParser(description='Convert Lammps custom dump file to H5MD format file.')
+parser = argparse.ArgumentParser(description='Convert Lammps custom dump file to H5MD format file.\
+                                 IMPORTANT NOTES:Only used for simulation where number of particles does not change.')
 parser.add_argument('lammps_custom_dump', help='Lammps custom dump file.')
 parser.add_argument('lammps_hdf5_dump', help='H5MD file.')
 parser.add_argument('-np', '--no-position', help='disable writing position to H5MD file.', \
@@ -29,7 +32,14 @@ parser.add_argument('-no', '--no-others', help='disbale writing other informatio
                     action='store_true', dest='no_others')
 parser.add_argument('-s', '--stride', help='write H5MD file every this many snapshots.', \
                     dest='stride', type=int)
+parser.add_argument('-uw', '--unwrap', help='write unwrapped coordinates of particles in H5MD file.', \
+                    action='store_true', dest='unwrap')
+parser.add_argument('-i', '--image', help='store image flags of particles in H5MD file.', \
+                    action='store_true', dest='image')
+parser.add_argument('-q', '--quite', help='turn of printing information on screen.',\
+                    action='store_true', dest='quite')
 args = parser.parse_args()
+
 
 if args.stride is None:
     stride = 1
@@ -47,33 +57,66 @@ with open(args.lammps_custom_dump) as f:
         if check:
             natoms = np.int_(line.split()[0])
             check = False
+        if 'ITEM: BOX BOUNDS' in line:
+            if not np.any(['p' in line.split()[i] for i in range(3,len(line.split()))]):
+                if args.unwrap:
+                    sys.stdout.write("No periodic boundary found. Ignore argument '--unwrap'.\n")
+                if args.image:
+                    sys.stdtout.write("No periodic boundary found. Ignore argument '--image'.\n")
+            else:
+                if not args.unwrap and not args.image:
+                    sys.stdout.write("\033[93mWARNING: Periodic boundary found. Neither argument '--unwrap' nor '--image' are provided.\033[0m\n")
         if 'ITEM: ATOMS' in line:
             attribute_info = line.split()[2:]
-            try:
-                id_index = attribute_info.index('id')
-                x_index = attribute_info.index('x')
-                y_index = attribute_info.index('y')
-                z_index = attribute_info.index('z')
-                vx_index = attribute_info.index('vx')
-                vy_index = attribute_info.index('vy')
-                vz_index = attribute_info.index('vz')
-            except:
-                sys.stdout.write('No atom ID/positon/velocity found...\n')
-                sys.stdout.flush()
             break
 
-# get flags
-if x_index and y_index and z_index and not args.no_position:
-    position_flag = True
-if not args.no_position and not x_index and not y_index and not z_index:
-    sys.stdout.write('No position information in trajectory file. Skip it.\n')
-if vx_index and vy_index and vz_index and not args.no_velocity:
-    velocity_flag = True
-if not args.no_velocity and not x_index and not y_index and not z_index:
-    sys.stdout.write('No velocity information in trajectory file. Skip it.\n')
-if args.no_others:
-    sys.stdout.write('Ignore informations other than position/velocity.\n')
-    others_flag = False
+# check attribute information
+if 'id' in attribute_info:
+    id_index = attribute_info.index('id')
+else:
+    sys.stdout.write('\033[93mERROR: No particle ID is found in dump file. \
+Make sure that the order of particles does not change in dump file.\033[0m\n')
+    sys.stdout.flush()
+
+if 'x' in attribute_info and 'y' in attribute_info and 'z' in attribute_info:
+    x_index = attribute_info.index('x')
+    y_index = attribute_info.index('y')
+    z_index = attribute_info.index('z')
+    if not args.no_position:
+        position_flag = True
+else:
+    if not args.no_position:
+        sys.stdout.write('*** No position information found in dump file. Skip it. ***\n')
+        sys.stdout.flush()
+
+if 'vx' in attribute_info and 'vy' in attribute_info and 'vz' in attribute_info:
+    vx_index = attribute_info.index('vx')
+    vy_index = attribute_info.index('vy')
+    vz_index = attribute_info.index('vz')
+    if not args.no_velocity:
+        velocity_flag = True
+else:
+    if not args.no_velocity:
+        sys.stdout.write('*** No velocity information found in dump file. Skip it. ***\n')
+        sys.stdout.flush()
+
+if 'ix' in attribute_info and 'iy' in attribute_info and 'iz' in attribute_info:
+    ix_index = attribute_info.index('ix')
+    iy_index = attribute_info.index('iy')
+    iz_index = attribute_info.index('iz')
+    if not args.unwrap and not args.image:
+        sys.stdout.write('\033[93mWARNING: Image flags found in dump file.\033[0m\n')
+        sys.stdout.flush()
+    unwrap_flag = args.unwrap
+    image_flag = args.image
+else:
+    if args.unwrap or args.image:
+        sys.stdout.write('*** No image information found in dump file. Skip it. ***\n')
+        sys.stdout.flush()
+
+if 'xu' in attribute_info and 'yu' in attribute_info and 'zu' in attribute_info:
+    sys.stdout.write('\033[93mWARNING: Unwrapped position found in dump file.\033[0m\n')
+    sys.stdout.flush()
 
 number_lines_one_frame = 9 + natoms # 9 = number of head lines for each frame
 
@@ -98,11 +141,12 @@ hdf_file.create_group('particles/all/box')
 hdf_file.create_group('particles/all/box/edges')
 
 attribute_info_new = attribute_info[:]
-try:
-    for key in ['id', 'x', 'y', 'z', 'vx', 'vy', 'vz']:
+for key in ['id', 'x', 'y', 'z', 'vx', 'vy', 'vz', 'ix', 'iy', 'iz', 'xu', 'yu', 'zu']:
+    try:
         attribute_info_new.remove(key)
-except ValueError:
-    pass
+    except ValueError:
+        pass
+
 
 if others_flag:
     for attribute in attribute_info_new:
@@ -117,12 +161,14 @@ if position_flag:
     hdf_file.create_group('particles/all/position')
 if velocity_flag:
     hdf_file.create_group('particles/all/velocity')
+if image_flag:
+    hdf_file.create_group('particles/all/image')
 
 snap_index = 0 # keep track of the index of frames when reading
 snap_index_write = 0 # keep track the actual number of snapshots written to H5MD file
 
 start_time = time.time() # get the start time
-sys.stdout.write('Start to convert data...\n')
+sys.stdout.write('\033[1mStart to convert data...\033[0m\n')
 sys.stdout.flush()
 with open(args.lammps_custom_dump, 'r') as f:
     while True:
@@ -144,6 +190,8 @@ with open(args.lammps_custom_dump, 'r') as f:
         box = ''.join(next_n_lines[5:8])
         box = str2array(box)
         box_shape = box.shape
+        if unwrap_flag:
+            box_edge_size = box[:,1] - box[:,0]
 
         # get per atom information: id, position, velocity, energy ...
         atom_info = ''.join(next_n_lines[9:])
@@ -191,6 +239,17 @@ with open(args.lammps_custom_dump, 'r') as f:
                 hdf_file['particles/all/velocity'].create_dataset('time', (1,), \
                                                                   maxshape=(None,),\
                                                                   dtype='f8')
+            if image_flag:
+                hdf_file['particles/all/image'].create_dataset('value', \
+                                                               (1, natoms, 3),\
+                                                               maxshape=(None, natoms, 3),\
+                                                               dtype='i4')
+                hdf_file['particles/all/image'].create_dataset('step', (1,), \
+                                                               maxshape=(None,),\
+                                                               dtype='i4')
+                hdf_file['particles/all/image'].create_dataset('time', (1,), \
+                                                               maxshape=(None,),\
+                                                               dtype='f8')
             hdf_file['particles/all/box/edges'].create_dataset('value', \
                                                                (1, box_shape[0], \
                                                                 box_shape[1]), \
@@ -218,6 +277,10 @@ with open(args.lammps_custom_dump, 'r') as f:
                 hdf_file['particles/all/velocity']['value'].resize((snap_index_write+1, natoms, 3))
                 hdf_file['particles/all/velocity']['step'].resize((snap_index_write+1,))
                 hdf_file['particles/all/velocity']['time'].resize((snap_index_write+1,))
+            if image_flag:
+                hdf_file['particles/all/image']['value'].resize((snap_index_write+1, natoms, 3))
+                hdf_file['particles/all/image']['step'].resize((snap_index_write+1,))
+                hdf_file['particles/all/image']['time'].resize((snap_index_write+1,))
             hdf_file['particles/all/box/edges']['value'].resize((snap_index_write+1,box_shape[0],box_shape[1]))
             hdf_file['particles/all/box/edges']['step'].resize((snap_index_write+1,))
             hdf_file['particles/all/box/edges']['time'].resize((snap_index_write+1,))
@@ -230,21 +293,30 @@ with open(args.lammps_custom_dump, 'r') as f:
                 hdf_file['particles/all/'+attribute]['step'][snap_index_write] = timestep
                 hdf_file['particles/all/'+attribute]['time'][snap_index_write] = timestep
         if position_flag:
-            hdf_file['particles/all/position']['value'][snap_index_write] = np.float64(atom_info[:,x_index:z_index+1])
+            if unwrap_flag:
+                hdf_file['particles/all/position']['value'][snap_index_write] = np.float64(atom_info[:,x_index:z_index+1]) + \
+                np.float64(atom_info[:,ix_index:iz_index+1])*box_edge_size
+            else:
+                hdf_file['particles/all/position']['value'][snap_index_write] = np.float64(atom_info[:,x_index:z_index+1])
             hdf_file['particles/all/position']['step'][snap_index_write] = timestep
             hdf_file['particles/all/position']['time'][snap_index_write] = timestep
         if velocity_flag:
             hdf_file['particles/all/velocity']['value'][snap_index_write] = np.float64(atom_info[:,vx_index:vz_index+1])
             hdf_file['particles/all/velocity']['step'][snap_index_write] = timestep
             hdf_file['particles/all/velocity']['time'][snap_index_write] = timestep
+        if image_flag:
+            hdf_file['particles/all/image']['value'][snap_index_write] = np.int_(atom_info[:,ix_index:iz_index+1])
+            hdf_file['particles/all/image']['step'][snap_index_write] = timestep
+            hdf_file['particles/all/image']['time'][snap_index_write] = timestep
         hdf_file['particles/all/box/edges']['value'][snap_index_write] = np.float64(box)
         hdf_file['particles/all/box/edges']['step'][snap_index_write] = timestep
         hdf_file['particles/all/box/edges']['time'][snap_index_write] = timestep
 
         snap_index += 1
         snap_index_write += 1
-        sys.stdout.write("\rWriting snapshot #{}...".format(snap_index))
-        sys.stdout.flush()
+        if not args.quite:
+            sys.stdout.write("\rWriting snapshot #{}...".format(snap_index))
+            sys.stdout.flush()
         hdf_file.flush()
 
 end_time = time.time()

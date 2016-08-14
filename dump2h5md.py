@@ -289,7 +289,7 @@ with open(args.lammps_custom_dump, 'r') as f:
         # initial dataset
         if others_flag:
             for attribute in attribute_info_new:
-                if attribute != 'type'
+                if attribute != 'type':
                     hdf_file['particles/all/'+attribute]['value'][snap_index_write] = np.float64(atom_info[:, attribute_info.index(attribute)])
                     hdf_file['particles/all/'+attribute]['step'][snap_index_write] = timestep
                     hdf_file['particles/all/'+attribute]['time'][snap_index_write] = timestep

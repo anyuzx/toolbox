@@ -46,6 +46,8 @@ def read_log_file(fp):
     data = []
     headers = []
     with open(fp, 'r') as f:
+        sys.stdout.write('Reading file {}\n'.format(fp))
+        sys.stdout.flush()
         for i, line in enumerate(f):
             try:
                 if line.split()[0] == 'Step':
@@ -59,7 +61,10 @@ def read_log_file(fp):
                     record = False
                     continue
                 if record:
-                    data[-1].append(np.float32(line.split()))
+                    try:
+                        data[-1].append(np.float32(line.split()))
+                    except ValueError:
+                        continue
             except IndexError:
                 continue
 

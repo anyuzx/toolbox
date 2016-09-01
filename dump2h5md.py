@@ -32,6 +32,10 @@ parser.add_argument('-no', '--no-others', help='disbale writing other informatio
                     action='store_true', dest='no_others')
 parser.add_argument('-s', '--stride', help='write H5MD file every this many snapshots.', \
                     dest='stride', type=int)
+parser.add_argument('-b', '--begin', help='write H5MD file starting from this index.', \
+                    dest='begin', type=int)
+parser.add_argument('-t', '--terminate', help='stop write H5MD file starting from this index.', \
+                    dest='terminate', type=int)
 parser.add_argument('-uw', '--unwrap', help='write unwrapped coordinates of particles in H5MD file.', \
                     action='store_true', dest='unwrap')
 parser.add_argument('-i', '--image', help='store image flags of particles in H5MD file.', \
@@ -174,11 +178,44 @@ with open(args.lammps_custom_dump, 'r') as f:
     while True:
         next_n_lines = list(islice(f, number_lines_one_frame))
 
-        if snap_index % stride == 0:
-            pass
-        else:
-            snap_index += 1
-            continue
+        # enumerate all the posiibilities
+        if args.begin is None and args.terminate is None:
+            if snap_index % stride == 0:
+                pass
+            else:
+                snap_index += 1
+                continue
+        elif args.begin is not None and args.terminate is None:
+            if snap_index >= args.begin:
+                if snap_index % stride == 0:
+                    pass
+                else:
+                    snap_index += 1
+                    continue
+            else:
+                snap_index += 1
+                continue
+        elif args.begin is None and args.terminate is not None:
+            if snap_index <= args.terminate:
+                if snap_index % stride == 0:
+                    pass
+                else:
+                    snap_index += 1
+                    continue
+            else:
+                break
+        elif args.begin is not None and args.terminate is not None:
+            if snap_index >= args.begin and snap_index <= args.terminate:
+                if snap_index % stride == 0:
+                    pass
+                else:
+                    snap_index += 1
+                    continue
+            elif snap_index > args.terminate:
+                break
+            else:
+                snap_index += 1
+                continue
 
         if not next_n_lines:
             break
@@ -205,7 +242,7 @@ with open(args.lammps_custom_dump, 'r') as f:
             pass
 
         # initiliaze the datasets otherwise resize the dataset
-        if snap_index == 0:
+        if snap_index_write == 0:
             if others_flag:
                 for attribute in attribute_info_new:
                     if attribute == 'type':

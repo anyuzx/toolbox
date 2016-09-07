@@ -50,7 +50,7 @@ def read_log_file(fp):
         sys.stdout.flush()
         for i, line in enumerate(f):
             try:
-                if line.split()[0] == 'Step':
+                if 'Step' in line.split():
                     count += 1
                     data.append([])
                     header = line.split()

@@ -134,6 +134,24 @@ class LammpsData:
             self.headers['angles'] = natoms-2
             self.headers['angle types'] = 1
 
+    def computeRg(self):
+        if len(self.attribute) == 0:
+            sys.stdout.write('Please specify the atom attributes\n')
+            sys.stdout.flush()
+        else:
+            if 'x' not in self.attribute or 'y' not in self.attribute or 'z' not in self.attribute:
+                sys.stdout.write('Please specify x,y,z attribute in self.attribute.\n')
+            else:
+                index_x = self.attribute.index('x')
+                index_y = self.attribute.index('y')
+                index_z = self.attribute.index('z')
+                coords = np.array(self.sections['Atoms'])[:, np.array([index_x, index_y, index_z])]
+                coords = np.float_(coords)
+                rcm = np.mean(coords, axis=0)
+                rg2 = (1.0/len(coords)) * np.sum(np.power(coords - rcm, 2))
+                return np.sqrt(rg2)
+
+
 # ------------------------------------------------------------------------------
 # define Lammps Data File keywords
 hkeywords = ["atoms","ellipsoids","lines","triangles","bodies",

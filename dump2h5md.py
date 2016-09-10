@@ -5,6 +5,7 @@ from io import StringIO
 import time
 from itertools import islice
 import argparse
+import os
 
 def str2array(str):
     str_temp = str.decode('unicode-escape')
@@ -42,8 +43,21 @@ parser.add_argument('-i', '--image', help='store image flags of particles in H5M
                     action='store_true', dest='image')
 parser.add_argument('-q', '--quite', help='turn of printing information on screen.',\
                     action='store_true', dest='quite')
+parser.add_argument('-l', '--log',  help='output to log files.',\
+                    dest='logfile')
 args = parser.parse_args()
 
+# report error if both args.quite and args.logfile are required
+if args.quite and args.logfile:
+    sys.stdout.write('ERROR: Both quite and log argument are specified. Program terminated.\n')
+    sys.stdout.flush()
+    sys.exit(0)
+
+# redirect stdout to log file if specified
+if args.logfile:
+    sys.stdout = open(args.logfile, 'w')
+elif args.quite:
+    sys.stdout = open(os.devnull, 'w')
 
 if args.stride is None:
     stride = 1
@@ -172,8 +186,12 @@ snap_index = 0 # keep track of the index of frames when reading
 snap_index_write = 0 # keep track the actual number of snapshots written to H5MD file
 
 start_time = time.time() # get the start time
-sys.stdout.write('\033[1mStart to convert data...\033[0m\n')
-sys.stdout.flush()
+if args.logfile:
+    sys.stdout.write('Start to convert data...\n')
+    sys.stdout.flush()
+else:
+    sys.stdout.write('\033[1mStart to convert data...\033[0m\n')
+    sys.stdout.flush()
 with open(args.lammps_custom_dump, 'r') as f:
     while True:
         next_n_lines = list(islice(f, number_lines_one_frame))
@@ -352,7 +370,10 @@ with open(args.lammps_custom_dump, 'r') as f:
 
         snap_index += 1
         snap_index_write += 1
-        if not args.quite:
+        if args.logfile:
+            sys.stdout.write("Writing snapshot #{}\n".format(snap_index))
+            sys.stdout.flush()
+        else:
             sys.stdout.write("\rWriting snapshot #{}...".format(snap_index))
             sys.stdout.flush()
         hdf_file.flush()

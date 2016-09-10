@@ -187,10 +187,10 @@ snap_index_write = 0 # keep track the actual number of snapshots written to H5MD
 
 start_time = time.time() # get the start time
 if args.logfile:
-    sys.stdout.write('Start to convert data...\n')
+    sys.stdout.write('Start to convert file {}...\n'.format(args.lammps_custom_dump))
     sys.stdout.flush()
 else:
-    sys.stdout.write('\033[1mStart to convert data...\033[0m\n')
+    sys.stdout.write('\033[1mStart to convert file {}...\033[0m\n'.format(args.lammps_custom_dump))
     sys.stdout.flush()
 with open(args.lammps_custom_dump, 'r') as f:
     while True:

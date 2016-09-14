@@ -442,7 +442,7 @@ if __name__ == "__main__":
     parser.add_argument('-norm', '--normalize', help='Specify the normalization factor.', dest='norm', type=int)
     args = parser.parse_args()
 
-    cmap = contactmap.contactmap(chrom=args.chr, start=args.start, end=args.end, bin_size=args.bin_size)
+    cmap = contactmap(chrom=args.chr, start=args.start, end=args.end, bin_size=args.bin_size)
     cmap.read(args.input_file)
     cmap.normalize(args.norm)
     cmap.plot_map(args.output_file, color_range=[0.0, 0.005], mode='normalize')

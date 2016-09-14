@@ -11,6 +11,7 @@ import pandas as pd
 import datetime
 import sys
 import os
+import argparse
 
 class contactmap:
     def __init__(self, chrom, start, end, bin_size):
@@ -427,3 +428,21 @@ class MidPointNorm(Normalize):
                 return  val*abs(vmin-midpoint) + midpoint
             else:
                 return  val*abs(vmax-midpoint) + midpoint
+
+if __name__ == "__main__":
+    chromosome_choice = ['Chr'+str(i) for i in range(1,23)]
+    chromosome_choice.append('ChrX')
+    parser = argparse.ArgumentParser(description='This script is used to plot contact map.')
+    parser.add_argument('-in', '--input', help='contact map data file path.', dest='input_file')
+    parser.add_argument('-out', '--output', help='contact map plot file path.', dest='output_file')
+    parser.add_argument('-chr', '--chromosome', help='Specify which chromosome', dest='chr', choices=chromosome_choice)
+    parser.add_argument('-s', '--start', help='Specify start loci.', dest='start', type=int)
+    parser.add_argument('-e', '--end', help='Speicfy end loci.', dest='end', type=int)
+    parser.add_argument('-b', '--bin', help='Specify bin size.', dest='bin_size')
+    parser.add_argument('-norm', '--normalize', help='Specify the normalization factor.', dest='norm', type=int)
+    args = parser.parse_args()
+
+    cmap = contactmap.contactmap(chrom=args.chr, start=args.start, end=args.end, bin_size=args.bin_size)
+    cmap.read(args.input_file)
+    cmap.normalize(args.norm)
+    cmap.plot_map(args.output_file, color_range=[0.0, 0.005], mode='normalize')

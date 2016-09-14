@@ -438,7 +438,7 @@ if __name__ == "__main__":
     parser.add_argument('-chr', '--chromosome', help='Specify which chromosome', dest='chr', choices=chromosome_choice)
     parser.add_argument('-s', '--start', help='Specify start loci.', dest='start', type=int)
     parser.add_argument('-e', '--end', help='Speicfy end loci.', dest='end', type=int)
-    parser.add_argument('-b', '--bin', help='Specify bin size.', dest='bin_size')
+    parser.add_argument('-b', '--bin', help='Specify bin size.', dest='bin_size', type=int)
     parser.add_argument('-norm', '--normalize', help='Specify the normalization factor.', dest='norm', type=int)
     args = parser.parse_args()
 

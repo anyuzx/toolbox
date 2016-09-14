@@ -5,7 +5,7 @@ import argparse
 import glob
 import LammpsData as ld
 
-def main():
+def homo2sc():
     parser = argparse.ArgumentParser(description='Convert homopolymer configurations \
                                      to subcompartment model.')
     parser.add_argument('-in', '--input', help='data files need to be converted.', \
@@ -143,4 +143,4 @@ def get_state(filename, chrom, start, end, bin_size, data_source):
     return state_of_monomer_dic, monomer_state
 
 if __name__ == '__main__':
-    main()
+    homo2sc()

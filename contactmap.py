@@ -432,7 +432,7 @@ class MidPointNorm(Normalize):
 if __name__ == "__main__":
     chromosome_choice = ['Chr'+str(i) for i in range(1,23)]
     chromosome_choice.append('ChrX')
-    parser = argparse.ArgumentParser(description='This script is used to plot contact map.')
+    parser = argparse.ArgumentParser(description='When using with command line. This script is can used to plot contact map.')
     parser.add_argument('-in', '--input', help='contact map data file path.', dest='input_file')
     parser.add_argument('-out', '--output', help='contact map plot file path.', dest='output_file')
     parser.add_argument('-chr', '--chromosome', help='Specify which chromosome', dest='chr', choices=chromosome_choice)

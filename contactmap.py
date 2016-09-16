@@ -26,7 +26,7 @@ class contactmap:
         self.start = start
         self.end = end
         self.bin_size = bin_size
-        self.norm_factor = None
+        self.norm_factor = 1
         self.norm_factor_OE = None
         self.norm_factor_coeff = None
         self.norm_factor_zscore = None

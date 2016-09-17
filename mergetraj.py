@@ -21,7 +21,7 @@ class traj:
     def get_firsttime(self):
         starttime = self.file['particles/all/position/time'][0]
         endtime = self.file['particles/all/position/time'][-1]
-        starttimestep = self.file['partciles/all/position/step'][0]
+        starttimestep = self.file['particles/all/position/step'][0]
         endtimestep = self.file['particles/all/position/step'][-1]
 
         return starttime, endtime, starttimestep, endtimestep

@@ -35,7 +35,7 @@ class traj:
     def get_atomnumber(self):
         # get the total number of atoms/particles stored in file
         try:
-            return = self.file['particles/all/position/value'].shape[1]
+            return self.file['particles/all/position/value'].shape[1]
         except:
             raise
 

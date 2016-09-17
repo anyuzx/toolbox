@@ -85,18 +85,19 @@ def mergetraj(filelst, foutname, stride):
             starttime0, endtime0, starttimestep0, endtimestep0 = traj0.get_firsttime()
             natoms0 = traj0.get_atomnumber()
             framenum0 = traj0.get_framenumber()
+            framenum0_stride = len(np.arange(framenum0)[::stride[index]])
             lastframe = traj0.get_frame(-1)
 
             box_shape = traj0.file['particles/all/box/edges/value'].shape
 
             new_file['particles/all/position'].create_dataset('value', \
-                                                             (framenum0, natoms0, 3),\
+                                                             (framenum0_stride, natoms0, 3),\
                                                               maxshape=(None, natoms0,3), \
                                                               dtype='f8')
-            new_file['particles/all/position'].create_dataset('step', (framenum0,), \
+            new_file['particles/all/position'].create_dataset('step', (framenum0_stride,), \
                                                                maxshape=(None,),\
                                                                dtype='i4')
-            new_file['particles/all/position'].create_dataset('time', (framenum0,), \
+            new_file['particles/all/position'].create_dataset('time', (framenum0_stride,), \
                                                                maxshape=(None,),\
                                                                dtype='f8')
 

@@ -4,6 +4,15 @@ import h5py
 import glob
 import argparse
 
+def memory_usage_resource():
+    import resource
+    rusage_denom = 1024.
+    if sys.platform == 'darwin':
+        # ... it seems that in OSX the output is different units ...
+        rusage_denom = rusage_denom * rusage_denom
+    mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / rusage_denom
+    return mem
+
 class traj:
     def __init__(self):
         self.file = None
@@ -154,6 +163,7 @@ def mergetraj(filelst, foutname):
         print framenum_temp
         print new_file['particles/all/position/value'].shape
         print traj1.file['particles/all/position/value'].shape
+        print memory_usage_resource()
         new_file['particles/all/position/value'][framenum_temp:] = traj1.file['particles/all/position/value'][1:]
         new_file['particles/all/position/step'][framenum_temp:] = traj1.file['particles/all/position/step'][1:] + endtimestep0
         new_file['particles/all/position/time'][framenum_temp:] = traj1.file['particles/all/position/time'][1:] + endtime0

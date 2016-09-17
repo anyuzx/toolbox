@@ -127,8 +127,8 @@ def mergetraj(filelst, foutname):
         firstframe = traj1.get_frame(-1)
 
         assert natoms1 == natoms0
-        assert np.all(firstframe == lastframe)
-
+        assert np.sum(np.power(firstframe - lastframe, 2.0)) <= 2.0
+        
         # resize dataset
         framenum_temp = new_file['particles/all/position/value'].shape[0]
         new_file['particles/all/position/value'].resize((framenum_temp+framenum1-1, natoms1))

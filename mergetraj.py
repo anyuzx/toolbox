@@ -81,8 +81,8 @@ def mergetraj(filelst, foutname):
             box_shape = traj0.file['particles/all/box/edges/value'].shape
 
             new_file['particles/all/position'].create_dataset('value', \
-                                                             (framenum0, natoms, 3),\
-                                                              maxshape=(None, natoms,3), \
+                                                             (framenum0, natoms0, 3),\
+                                                              maxshape=(None, natoms0,3), \
                                                               dtype='f8')
             new_file['particles/all/position'].create_dataset('step', (framenum0,), \
                                                                maxshape=(None,),\

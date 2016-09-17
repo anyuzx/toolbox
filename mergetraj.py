@@ -78,7 +78,7 @@ def mergetraj(filelst, foutname):
             framenum0 = traj0.get_framenumber()
             lastframe = traj0.get_frame(-1)
 
-            box_shape = traj0['particles/all/box/edges/value'].shape
+            box_shape = traj0.file['particles/all/box/edges/value'].shape
 
             new_file['particles/all/position'].create_dataset('value', \
                                                              (framenum0, natoms, 3),\
@@ -109,13 +109,13 @@ def mergetraj(filelst, foutname):
                                                                maxshape=(None,), \
                                                                dtype='f8')
 
-            new_file['particles/all/position/value'][:] = traj0['particles/all/position/value'][:]
-            new_file['particles/all/position/step'][:] = traj0['particles/all/position/step'][:]
-            new_file['particles/all/position/time'][:] = traj0['particles/all/position/time'][:]
+            new_file['particles/all/position/value'][:] = traj0.file['particles/all/position/value'][:]
+            new_file['particles/all/position/step'][:] = traj0.file['particles/all/position/step'][:]
+            new_file['particles/all/position/time'][:] = traj0.file['particles/all/position/time'][:]
 
-            new_file['particles/all/box/edges/value'][:] = traj0['particles/all/box/edges/value'][:]
-            new_file['particles/all/box/edges/step'][:] = traj0['particles/all/box/edges/step'][:]
-            new_file['particles/all/box/edges/time'][:] = traj0['particles/all/box/edges/time'][:]
+            new_file['particles/all/box/edges/value'][:] = traj0.file['particles/all/box/edges/value'][:]
+            new_file['particles/all/box/edges/step'][:] = traj0.file['particles/all/box/edges/step'][:]
+            new_file['particles/all/box/edges/time'][:] = traj0.file['particles/all/box/edges/time'][:]
 
             continue
 
@@ -144,13 +144,13 @@ def mergetraj(filelst, foutname):
         new_file['particles/all/box/edges/time'].resize((framenum_temp+framenum1-1,))
 
         # append new data
-        new_file['particles/all/position/value'][framenum_temp:] = traj1['particles/all/position/value'][1:]
-        new_file['particles/all/position/step'][framenum_temp:] = traj1['particles/all/position/step'][1:] + endtimestep0
-        new_file['particles/all/position/time'][framenum_temp:] = traj1['particles/all/position/time'][1:] + endtime0
+        new_file['particles/all/position/value'][framenum_temp:] = traj1.file['particles/all/position/value'][1:]
+        new_file['particles/all/position/step'][framenum_temp:] = traj1.file['particles/all/position/step'][1:] + endtimestep0
+        new_file['particles/all/position/time'][framenum_temp:] = traj1.file['particles/all/position/time'][1:] + endtime0
 
-        new_file['particles/all/box/edges/value'][framenum_temp:] = traj1['particles/all/box/edges/value'][1:]
-        new_file['particles/all/box/edges/step'][framenum_temp:] = traj1['particles/all/box/edges/step'][1:] + endtimestep0
-        new_file['particles/all/box/edges/time'][framenum_temp:] = traj1['particles/all/box/edges/time'][1:] + endtime0
+        new_file['particles/all/box/edges/value'][framenum_temp:] = traj1.file['particles/all/box/edges/value'][1:]
+        new_file['particles/all/box/edges/step'][framenum_temp:] = traj1.file['particles/all/box/edges/step'][1:] + endtimestep0
+        new_file['particles/all/box/edges/time'][framenum_temp:] = traj1.file['particles/all/box/edges/time'][1:] + endtime0
 
         lastframe = traj1.get_frame(-1)
 

@@ -54,7 +54,7 @@ class traj:
     def delete(self):
         self.file.close()
 
-def mergetraj(filelst, foutname):
+def mergetraj(filelst, foutname, stride):
     new_file = h5py.File(foutname, 'w')
     # create `h5md` group
     new_file.create_group('h5md')
@@ -76,7 +76,7 @@ def mergetraj(filelst, foutname):
 
     new_file.create_group('particles/all/position')
 
-    for fp in filelst:
+    for index, fp in enumerate(filelst):
         try:
             traj0
         except NameError:
@@ -120,9 +120,9 @@ def mergetraj(filelst, foutname):
                                                                dtype='f8')
             '''
 
-            new_file['particles/all/position/value'][:] = traj0.file['particles/all/position/value'][:]
-            new_file['particles/all/position/step'][:] = traj0.file['particles/all/position/step'][:]
-            new_file['particles/all/position/time'][:] = traj0.file['particles/all/position/time'][:]
+            new_file['particles/all/position/value'][:] = traj0.file['particles/all/position/value'][::stride[index]]
+            new_file['particles/all/position/step'][:] = traj0.file['particles/all/position/step'][::stride[index]]
+            new_file['particles/all/position/time'][:] = traj0.file['particles/all/position/time'][::stride[index]]
 
             '''
             new_file['particles/all/box/edges/value'][:] = traj0.file['particles/all/box/edges/value'][:]
@@ -137,6 +137,7 @@ def mergetraj(filelst, foutname):
         starttime1, endtime1, starttimestep1, endtimestep1 = traj1.get_firsttime()
         natoms1 = traj1.get_atomnumber()
         framenum1 = traj1.get_framenumber()
+        framenum1_stride = len(np.arange(framenum1)[::stride[index]])
         firstframe = traj1.get_frame(0)
 
         assert natoms1 == natoms0
@@ -145,9 +146,9 @@ def mergetraj(filelst, foutname):
 
         # resize dataset
         framenum_temp = new_file['particles/all/position/value'].shape[0]
-        new_file['particles/all/position/value'].resize((framenum_temp+framenum1-1, natoms1, 3))
-        new_file['particles/all/position/step'].resize((framenum_temp+framenum1-1,))
-        new_file['particles/all/position/time'].resize((framenum_temp+framenum1-1,))
+        new_file['particles/all/position/value'].resize((framenum_temp+framenum1_stride-1, natoms1, 3))
+        new_file['particles/all/position/step'].resize((framenum_temp+framenum1_stride-1,))
+        new_file['particles/all/position/time'].resize((framenum_temp+framenum1_stride-1,))
 
         '''
         if len(box_shape) == 3:
@@ -164,9 +165,9 @@ def mergetraj(filelst, foutname):
         print new_file['particles/all/position/value'].shape
         print traj1.file['particles/all/position/value'].shape
         print memory_usage_resource()
-        new_file['particles/all/position/value'][framenum_temp:] = traj1.file['particles/all/position/value'][1:]
-        new_file['particles/all/position/step'][framenum_temp:] = traj1.file['particles/all/position/step'][1:] + endtimestep0
-        new_file['particles/all/position/time'][framenum_temp:] = traj1.file['particles/all/position/time'][1:] + endtime0
+        new_file['particles/all/position/value'][framenum_temp:] = traj1.file['particles/all/position/value'][::stride[index]][1::]
+        new_file['particles/all/position/step'][framenum_temp:] = traj1.file['particles/all/position/step'][::stride[index]][1::] + endtimestep0
+        new_file['particles/all/position/time'][framenum_temp:] = traj1.file['particles/all/position/time'][::stride[index]][1::] + endtime0
 
         '''
         new_file['particles/all/box/edges/value'][framenum_temp:] = traj1.file['particles/all/box/edges/value'][1:]
@@ -189,6 +190,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Merge multiple trajectories file together.')
     parser.add_argument('-in', '--input', help='list of trajectory files.', dest='input', nargs='*')
     parser.add_argument('-out', '--output', help='path of output trajectory file.', dest='output')
+    parser.add_argument('-s', '--stride', help='stride option.provided as list', dest='stride')
     args = parser.parse_args()
 
-    mergetraj(args.input, args.output)
+    stride = np.int_(args.stride)
+    mergetraj(args.input, args.output, stride)

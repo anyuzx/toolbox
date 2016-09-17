@@ -124,7 +124,7 @@ def mergetraj(filelst, foutname):
         starttime1, endtime1, starttimestep1, endtimestep1 = traj1.get_firsttime()
         natoms1 = traj1.get_atomnumber()
         framenum1 = traj1.get_framenumber()
-        firstframe = traj1.get_frame(-1)
+        firstframe = traj1.get_frame(0)
 
         assert natoms1 == natoms0
         print np.sum(np.power(firstframe - lastframe, 2.0))
@@ -162,7 +162,7 @@ def mergetraj(filelst, foutname):
         traj1.delete()
         del traj1
 
-        new_file.close()
+    new_file.close()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Merge multiple trajectories file together.')

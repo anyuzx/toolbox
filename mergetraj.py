@@ -132,7 +132,7 @@ def mergetraj(filelst, foutname):
 
         # resize dataset
         framenum_temp = new_file['particles/all/position/value'].shape[0]
-        new_file['particles/all/position/value'].resize((framenum_temp+framenum1-1, natoms1))
+        new_file['particles/all/position/value'].resize((framenum_temp+framenum1-1, natoms1, 3))
         new_file['particles/all/position/step'].resize((framenum_temp+framenum1-1,))
         new_file['particles/all/position/time'].resize((framenum_temp+framenum1-1,))
 

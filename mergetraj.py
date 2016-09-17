@@ -5,32 +5,32 @@ import glob
 import argparse
 
 class traj:
-	def __init__(self):
-		self.file = None
-		self.starttime = None
-		self.starttimestep = None
-		self.endtime = None
-		self.endtimestep = None
+    def __init__(self):
+        self.file = None
+        self.starttime = None
+        self.starttimestep = None
+        self.endtime = None
+        self.endtimestep = None
 
-	def load(self, file):
-		try:
-			self.file = h5py.File(file, 'r')
-		except:
-			raise
+    def load(self, file):
+        try:
+            self.file = h5py.File(file, 'r')
+        except:
+            raise
 
-	def get_firsttime(self):
-		starttime = self.file['particles/all/position/time'][0]
-		endtime = self.file['particles/all/position/time'][-1]
-		starttimestep = self.file['partciles/all/position/step'][0]
-		endtimestep = self.file['particles/all/position/step'][-1]
+    def get_firsttime(self):
+        starttime = self.file['particles/all/position/time'][0]
+        endtime = self.file['particles/all/position/time'][-1]
+        starttimestep = self.file['partciles/all/position/step'][0]
+        endtimestep = self.file['particles/all/position/step'][-1]
 
-		return starttime, endtime, starttimestep, endtimestep
+        return starttime, endtime, starttimestep, endtimestep
 
-	def get_framenumber(self):
-		try:
-			return self.file['particles/all/position/value'].shape[0]
-		except:
-			raise
+    def get_framenumber(self):
+        try:
+            return self.file['particles/all/position/value'].shape[0]
+        except:
+            raise
 
     def get_atomnumber(self):
         # get the total number of atoms/particles stored in file
@@ -39,48 +39,48 @@ class traj:
         except:
             raise
 
-	def get_frame(self,t):
-		return self.file['particles/all/positon/value'][t]
+    def get_frame(self,t):
+        return self.file['particles/all/positon/value'][t]
 
-	def delete(self):
-		self.file.close()
+    def delete(self):
+        self.file.close()
 
 def mergetraj(filelst, foutname):
-	new_file = h5py.File(foutname, 'w')
-	# create `h5md` group
-	new_file.create_group('h5md')
-	new_file.create_group('h5md/author')
-	new_file.create_group('h5md/creator')
+    new_file = h5py.File(foutname, 'w')
+    # create `h5md` group
+    new_file.create_group('h5md')
+    new_file.create_group('h5md/author')
+    new_file.create_group('h5md/creator')
 
-	# create `observables` group
-	new_file.create_group('observables')
+    # create `observables` group
+    new_file.create_group('observables')
 
-	# create `parameters` group
-	new_file.create_group('parameters')
+    # create `parameters` group
+    new_file.create_group('parameters')
 
-	# create particles group
-	new_file.create_group('particles')
-	new_file.create_group('particles/all')
-	# create box group
-	new_file.create_group('particles/all/box')
-	new_file.create_group('particles/all/box/edges')
+    # create particles group
+    new_file.create_group('particles')
+    new_file.create_group('particles/all')
+    # create box group
+    new_file.create_group('particles/all/box')
+    new_file.create_group('particles/all/box/edges')
 
-	new_file.create_group('particles/all/position')
+    new_file.create_group('particles/all/position')
 
-	for fp in filelst:
-		try:
-			traj0
-		except NameError:
-			traj0 = traj()
-			traj0.load(fp)
-			starttime0, endtime0, starttimestep0, endtimestep0 = traj0.get_firsttime()
-			natoms0 = traj0.get_atomnumber()
-			framenum0 = traj0.get_framenumber()
-			lastframe = traj0.get_frame(-1)
+    for fp in filelst:
+        try:
+            traj0
+        except NameError:
+            traj0 = traj()
+            traj0.load(fp)
+            starttime0, endtime0, starttimestep0, endtimestep0 = traj0.get_firsttime()
+            natoms0 = traj0.get_atomnumber()
+            framenum0 = traj0.get_framenumber()
+            lastframe = traj0.get_frame(-1)
 
-			box_shape = traj0['particles/all/box/edges/value'].shape
+            box_shape = traj0['particles/all/box/edges/value'].shape
 
-			new_file['particles/all/position'].create_dataset('value', \
+            new_file['particles/all/position'].create_dataset('value', \
                                                              (framenum0, natoms, 3),\
                                                               maxshape=(None, natoms,3), \
                                                               dtype='f8')
@@ -92,16 +92,16 @@ def mergetraj(filelst, foutname):
                                                                dtype='f8')
 
             if len(box_shape) == 3:
-            	new_file['particles/all/box/edges'].create_dataset('value', \
+                new_file['particles/all/box/edges'].create_dataset('value', \
                                                                (framenum0, box_shape[1], \
                                                                 box_shape[2]), \
                                                                maxshape=(None, box_shape[1], box_shape[2]), \
                                                                dtype='f8')
             elif len(box_shape) == 2:
-            	new_file['particles/all/box/edges'].create_dataset('value', \
-            		                                              (framenum0, box_shape[1]), \
-            		                                              maxshape=(None, box_shape[1]),\
-            		                                              dtype='f8')
+                new_file['particles/all/box/edges'].create_dataset('value', \
+                                                                  (framenum0, box_shape[1]), \
+                                                                  maxshape=(None, box_shape[1]),\
+                                                                  dtype='f8')
             new_file['particles/all/box/edges'].create_dataset('step', (framenum0,), \
                                                                maxshape=(None,), \
                                                                dtype='i4')
@@ -136,9 +136,9 @@ def mergetraj(filelst, foutname):
         new_file['particles/all/position/time'].resize((framenum_temp+framenum1-1,))
 
         if len(box_shape) == 3:
-        	new_file['particles/all/box/edges/value'].resize((framenum_temp+framenum1-1,box_shape[1],box_shape[2]))
+            new_file['particles/all/box/edges/value'].resize((framenum_temp+framenum1-1,box_shape[1],box_shape[2]))
         elif len(box_shape) == 2:
-        	new_file['particles/all/box/edges/value'].resize((framenum_temp+framenum1-1,box_shape[1]))
+            new_file['particles/all/box/edges/value'].resize((framenum_temp+framenum1-1,box_shape[1]))
 
         new_file['particles/all/box/edges/step'].resize((framenum_temp+framenum1-1,))
         new_file['particles/all/box/edges/time'].resize((framenum_temp+framenum1-1,))
@@ -164,9 +164,9 @@ def mergetraj(filelst, foutname):
         new_file.close()
 
 if __name__ == "__main__":
-	parser = argparse.ArgumentParser(description='Merge multiple trajectories file together.')
-	parser.add_argument('-in', '--input', help='list of trajectory files.', dest='input', nargs='*')
-	parser.add_argument('-out', '--output', help='path of output trajectory file.', dest='output')
-	args = parser.parse_args()
+    parser = argparse.ArgumentParser(description='Merge multiple trajectories file together.')
+    parser.add_argument('-in', '--input', help='list of trajectory files.', dest='input', nargs='*')
+    parser.add_argument('-out', '--output', help='path of output trajectory file.', dest='output')
+    args = parser.parse_args()
 
-	mergetraj(args.input, args.output)
+    mergetraj(args.input, args.output)

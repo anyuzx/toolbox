@@ -190,7 +190,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Merge multiple trajectories file together.')
     parser.add_argument('-in', '--input', help='list of trajectory files.', dest='input', nargs='*')
     parser.add_argument('-out', '--output', help='path of output trajectory file.', dest='output')
-    parser.add_argument('-s', '--stride', help='stride option.provided as list', dest='stride')
+    parser.add_argument('-s', '--stride', help='stride option.provided as list', dest='stride', nargs='*')
     args = parser.parse_args()
 
     stride = np.int_(args.stride)

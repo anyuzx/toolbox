@@ -151,6 +151,9 @@ def mergetraj(filelst, foutname):
         '''
 
         # append new data
+        print framenum_temp
+        print new_file['particles/all/position/value'].shape
+        print traj1.file['particles/all/position/value'].shape
         new_file['particles/all/position/value'][framenum_temp:] = traj1.file['particles/all/position/value'][1:]
         new_file['particles/all/position/step'][framenum_temp:] = traj1.file['particles/all/position/step'][1:] + endtimestep0
         new_file['particles/all/position/time'][framenum_temp:] = traj1.file['particles/all/position/time'][1:] + endtime0

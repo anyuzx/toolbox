@@ -40,7 +40,7 @@ class traj:
             raise
 
     def get_frame(self,t):
-        return self.file['particles/all/positon/value'][t]
+        return self.file['particles/all/position/value'][t]
 
     def delete(self):
         self.file.close()

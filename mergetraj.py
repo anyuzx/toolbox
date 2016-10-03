@@ -142,7 +142,6 @@ def mergetraj(filelst, foutname, stride):
         firstframe = traj1.get_frame(0)
 
         assert natoms1 == natoms0
-        print np.sum(np.power(firstframe - lastframe, 2.0))
         assert np.sum(np.power(firstframe - lastframe, 2.0)) <= 2.0
 
         # resize dataset
@@ -162,10 +161,6 @@ def mergetraj(filelst, foutname, stride):
         '''
 
         # append new data
-        print framenum_temp
-        print new_file['particles/all/position/value'].shape
-        print traj1.file['particles/all/position/value'].shape
-        print memory_usage_resource()
         new_file['particles/all/position/value'][framenum_temp:] = traj1.file['particles/all/position/value'][::stride[index]][1::]
         new_file['particles/all/position/step'][framenum_temp:] = traj1.file['particles/all/position/step'][::stride[index]][1::] + endtimestep0
         new_file['particles/all/position/time'][framenum_temp:] = traj1.file['particles/all/position/time'][::stride[index]][1::] + endtime0

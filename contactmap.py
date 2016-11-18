@@ -135,7 +135,7 @@ class contactmap:
         self.PearsonCoeff_map += self.PearsonCoeff_map.T - np.diag(self.PearsonCoeff_map.diagonal())
         return self.PearsonCoeff_map
 
-    def plot_map(self, fp, color_range=[0.0,1.0], mode=None, state_mode='two state'):
+    def plot_map(self, fp, title='', color_range=[0.0,1.0], mode=None, state_mode='two state'):
         try:
             path = os.path.dirname(__file__)
             encode_state = get_state(os.path.join(path, 'wgEncodeBroadHmmGm12878HMM.bed'), chrom=self.chrom,\
@@ -199,7 +199,7 @@ class contactmap:
         # plot encode state bar
         ax.eventplot(encode_state_lst, colors=['lime', 'red'],\
                      lineoffsets=[-baroffset*1.5 for i in range(len(encode_state_lst))], \
-                     linewidth=barwidth, linelengths=barlength)
+                     linewidth=4.0*barwidth, linelengths=barlength)
         # plot subcompartment bar
         ax.eventplot(subcompartment_state_lst, colors=['magenta', 'cyan'],\
                      lineoffsets=[-baroffset*0.5 for i in range(len(subcompartment_state_lst))], \
@@ -213,19 +213,21 @@ class contactmap:
             img = ax.imshow(map_temp, interpolation='nearest', cmap = plt.cm.bwr,vmax=3.4)
             cbar = fig.colorbar(img)
         elif mode_flag == 4:
-            img = ax.imshow(map_temp, interpolation='nearest', cmap = plt.cm.bwr, vmin=-0.05, vmax=0.05)
-            #cbar = fig.colorbar(img)
+            img = ax.imshow(map_temp, interpolation='none', cmap = plt.cm.bwr)
+            #img = ax.imshow(map_temp, interpolation='nearest', cmap = plt.cm.bwr, vmin=-1.0, vmax=1.0)
+            cbar = fig.colorbar(img)
             #cbar.ax.set_yticklabels(['','',''])
-        ax.text(1,1,self.chrom, horizontalalignment='right', verticalalignment='bottom', transform=ax.transAxes)
-        ax.text(0,1,'25kb resolution', horizontalalignment='left', verticalalignment='bottom', transform=ax.transAxes)
-        plt.xticks([0, n/norm], ['{:.2f}Mb'.format(self.start/1000000.0), '{:.2f}Mb'.format(self.end/1000000.0)])
+        ax.text(1,1,r'$\mathrm{{}}$'.format(self.chrom), horizontalalignment='right', verticalalignment='bottom', transform=ax.transAxes)
+        ax.text(0,1,r'$\mathrm{25kb\ resolution}$', horizontalalignment='left', verticalalignment='bottom', transform=ax.transAxes)
+        plt.xticks([0, n/norm], [r'${:.2f}\mathrm{{Mbps}}$'.format(self.start/1000000.0), r'${:.2f}\mathrm{{Mbps}}$'.format(self.end/1000000.0)])
         plt.yticks([-2.0*baroffset, n/norm], ['', ''])
         plt.text(-0.04,0.97,r'$\mathrm{I}$', transform=ax.transAxes)
         plt.text(-0.04,0.92,r'$\mathrm{II}$', transform=ax.transAxes)
-        if '.png' in fp:
-            plt.savefig(fp, dpi=300)
+        plt.figtext(0.5,0.05, r'${}$'.format(title))
+        if '.svg' in fp:
+            plt.savefig(fp)
         else:
-            plt.savefig(fp+'.png', dpi=300)
+            plt.savefig(fp+'.svg')
 
     def plot_ps(self, foutname=None, guide=False):
         if self.contact_probability is None:

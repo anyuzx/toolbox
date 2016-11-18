@@ -43,17 +43,18 @@ class LammpsH5MD:
 
     def get_info(self):
         try:
-            self.snapshot_step = self.file['particles/c_pe/step'][:]
+            self.snapshot_step = self.file['particles/all/c_pe/step'][:]
             self.snapshot_number = self.snapshot_step.shape[0]
-            self.n_atoms = len(self.file['particles/c_pe/value'][0])
+            self.n_atoms = len(self.file['particles/all/c_pe/value'][0])
         except:
             print 'ERROR\n'
             exit(0)
 
     def get_energy(self, timestep):
-        pe_t = self.file['particles/c_pe/value'][timestep]
-        ke_t = self.file['particles/c_pe/value'][timestep]
-        return pe_t, ke_t, pe_t + ke_t
+        pe_t = self.file['particles/all/c_pe/value'][timestep]
+        #ke_t = self.file['particles/c_pe/value'][timestep]
+        #return pe_t, ke_t, pe_t + ke_t
+        return pe_t
 
 data1 = LammpsH5MD()
 data2 = LammpsH5MD()
@@ -88,8 +89,10 @@ for t in np.arange(startsnap, snapshot_number):
     sys.stdout.write('Analyzing timestep {}...\n'.format(t))
     sys.stdout.flush()
 
-    pe1, ke1, energy1 = data1.get_energy(t)
-    pe2, ke2, energy2 = data2.get_energy(t)
+    #pe1, ke1, energy1 = data1.get_energy(t)
+    #pe2, ke2, energy2 = data2.get_energy(t)
+    energy1 = data1.get_energy(t)
+    energy2 = data2.get_energy(t)
     energy1_mean.stream(energy1)
     energy2_mean.stream(energy2)
     ergodic_metric[t - startsnap] = np.mean(np.power(energy1_mean.stat() - energy2_mean.stat(), 2))

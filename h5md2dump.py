@@ -16,7 +16,7 @@ nsnapshots = h5md_traj['particles/all/position/value'].shape[0]
 natoms = h5md_traj['particles/all/position/value'].shape[1]
 
 with open(args.lammps_custom_dump, 'w') as f:
-	for s in len(nsnapshots):
+	for s in range(nsnapshots):
 		position = h5md_traj['particles/all/position/value'][s]
 
 		f.write('ITEM: TIMESTEP\n')

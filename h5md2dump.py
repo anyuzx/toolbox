@@ -12,6 +12,7 @@ parser.add_argument('lammps_custom_dump', help='Lammps custom dump file.')
 parser.add_argument('-l', '--log',  help='output to log files.',dest='logfile')
 args = parser.parse_args()
 
+start_time = time.time()
 # redirect stdout to log file if specified
 if args.logfile:
     sys.stdout = open(args.logfile, 'w')
@@ -54,3 +55,8 @@ with open(args.lammps_custom_dump, 'w') as f:
 
 		sys.stdout.write("Writing snapshot #{}\n".format(s+1))
         sys.stdout.flush()
+
+end_time = time.time()
+sys.stdout.write('\nTotal {} snapshots been written to custom dump file. Time used:{} mins\n'.format(nsnapshots, (end_time-start_time)/60))
+sys.stdout.flush()
+h5md_traj.close()

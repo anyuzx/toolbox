@@ -3,6 +3,7 @@ import h5py
 import argparse
 import sys
 import os
+import time
 
 # First declare several flags
 parser = argparse.ArgumentParser(description='Convert Lammps H5MD format dump file to custom format file.\

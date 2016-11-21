@@ -9,7 +9,15 @@ parser = argparse.ArgumentParser(description='Convert Lammps H5MD format dump fi
                                  IMPORTANT NOTES:Only used for simulation where number of particles does not change.')
 parser.add_argument('lammps_hdf5_dump', help='H5MD file.')
 parser.add_argument('lammps_custom_dump', help='Lammps custom dump file.')
+parser.add_argument('-l', '--log',  help='output to log files.',dest='logfile')
 args = parser.parse_args()
+
+# redirect stdout to log file if specified
+if args.logfile:
+    sys.stdout = open(args.logfile, 'w')
+
+sys.stdout.write('Start converting H5MD file to custom dump file.\n')
+sys.stdout.flush()
 
 h5md_traj = h5py.File(args.lammps_hdf5_dump, 'r')
 nsnapshots = h5md_traj['particles/all/position/value'].shape[0]
@@ -43,3 +51,6 @@ with open(args.lammps_custom_dump, 'w') as f:
 		f.write('ITEM: ATOMS id type x y z\n')
 		for item in snapshot:
 			f.write('{} {} {} {} {}\n'.format(int(item[0]), int(item[1]), item[2], item[3], item[4]))
+
+		sys.stdout.write("Writing snapshot #{}\n".format(s+1))
+        sys.stdout.flush()

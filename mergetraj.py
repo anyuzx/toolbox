@@ -189,5 +189,9 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--stride', help='stride option.provided as list', dest='stride', nargs='*')
     args = parser.parse_args()
 
-    stride = np.int_(args.stride)
+    if args.stride is None:
+    	stride = np.int_(np.ones(len(args.input)))
+    else:
+    	stride = np.int_(args.stride)
+    
     mergetraj(args.input, args.output, stride)

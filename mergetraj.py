@@ -28,12 +28,12 @@ class traj:
             raise
 
     def get_firsttime(self):
-        starttime = self.file['particles/all/position/time'][0]
+        #starttime = self.file['particles/all/position/time'][0]
         endtime = self.file['particles/all/position/time'][-1]
-        starttimestep = self.file['particles/all/position/step'][0]
+        #starttimestep = self.file['particles/all/position/step'][0]
         endtimestep = self.file['particles/all/position/step'][-1]
 
-        return starttime, endtime, starttimestep, endtimestep
+        return endtime, endtimestep
 
     def get_framenumber(self):
         try:
@@ -82,7 +82,7 @@ def mergetraj(filelst, foutname, stride):
         except NameError:
             traj0 = traj()
             traj0.load(fp)
-            starttime0, endtime0, starttimestep0, endtimestep0 = traj0.get_firsttime()
+            endtime0, endtimestep0 = traj0.get_firsttime()
             natoms0 = traj0.get_atomnumber()
             framenum0 = traj0.get_framenumber()
             framenum0_stride = len(np.arange(framenum0)[::stride[index]])
@@ -135,7 +135,7 @@ def mergetraj(filelst, foutname, stride):
 
         traj1 = traj()
         traj1.load(fp)
-        starttime1, endtime1, starttimestep1, endtimestep1 = traj1.get_firsttime()
+        endtime1, endtimestep1 = traj1.get_firsttime()
         natoms1 = traj1.get_atomnumber()
         framenum1 = traj1.get_framenumber()
         framenum1_stride = len(np.arange(framenum1)[::stride[index]])
@@ -173,7 +173,10 @@ def mergetraj(filelst, foutname, stride):
 
         lastframe = traj1.get_frame(-1)
 
-        starttime0, endtime0, starttimestep0, endtimestep0 = starttime1, endtime1, starttimestep1, endtimestep1
+        endtimestep0 = new_file['particles/all/c_pe/step'][-1]
+        endtime0 = new_file['particles/all/c_pe/time'][-1]
+
+        #starttime0, endtime0, starttimestep0, endtimestep0 = starttime1, endtime1, starttimestep1, endtimestep1
         framenum0 = framenum1
         natoms0 = natoms1
 
@@ -193,5 +196,5 @@ if __name__ == "__main__":
     	stride = np.int_(np.ones(len(args.input)))
     else:
     	stride = np.int_(args.stride)
-    
+
     mergetraj(args.input, args.output, stride)

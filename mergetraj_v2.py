@@ -91,8 +91,8 @@ def mergetraj(filelst, foutname, stride):
             box_shape = traj0.file['particles/all/box/edges/value'].shape
 
             new_file['particles/all/c_pe'].create_dataset('value', \
-                                                             (framenum0_stride, natoms0, 3),\
-                                                              maxshape=(None, natoms0,3), \
+                                                             (framenum0_stride, natoms0),\
+                                                              maxshape=(None, natoms0), \
                                                               dtype='f8')
             new_file['particles/all/c_pe'].create_dataset('step', (framenum0_stride,), \
                                                                maxshape=(None,),\
@@ -146,7 +146,7 @@ def mergetraj(filelst, foutname, stride):
 
         # resize dataset
         framenum_temp = new_file['particles/all/c_pe/value'].shape[0]
-        new_file['particles/all/c_pe/value'].resize((framenum_temp+framenum1_stride-1, natoms1, 3))
+        new_file['particles/all/c_pe/value'].resize((framenum_temp+framenum1_stride-1, natoms1))
         new_file['particles/all/c_pe/step'].resize((framenum_temp+framenum1_stride-1,))
         new_file['particles/all/c_pe/time'].resize((framenum_temp+framenum1_stride-1,))
 

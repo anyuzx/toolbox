@@ -173,8 +173,8 @@ def mergetraj(filelst, foutname, stride):
 
         lastframe = traj1.get_frame(-1)
 
-        endtimestep0 = new_file['particles/all/c_pe/step'][-1]
-        endtime0 = new_file['particles/all/c_pe/time'][-1]
+        endtimestep0 = new_file['particles/all/position/step'][-1]
+        endtime0 = new_file['particles/all/position/time'][-1]
 
         #starttime0, endtime0, starttimestep0, endtimestep0 = starttime1, endtime1, starttimestep1, endtimestep1
         framenum0 = framenum1

@@ -7,12 +7,27 @@ import os
 class LammpsLog:
     def __init__(self, *file_lst):
         self.data = {}
+        self.file_lst = file_lst
         if len(file_lst) == 0:
             raise ValueError('No files provided\n')
 
         for fp in file_lst:
             file_name = os.path.basename(fp)
             self.data[file_name] = read_log_file(fp)
+
+    def get(self, keyword, file_name=None, section_index=0):
+        if file_name is None:
+            keyword_data = []
+            for fp in self.file_lst:
+                tmp = self.data[fp][section_index][keyword].values
+                keyword_data.append(tmp)
+            keyword_data = np.array(keyword_data)
+            keyword_data = keyword_data.flatten()
+        else:
+            keyword_data = self.data[file_name][section_index][keyword].values
+            keyword_data = np.array(keyword_data)
+
+        return keyword_data
 
     def plot(self, file_name, section_index=0, foutname=None):
         df = self.data[file_name][section_index]

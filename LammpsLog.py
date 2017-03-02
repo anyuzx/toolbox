@@ -19,7 +19,8 @@ class LammpsLog:
         if file_name is None:
             keyword_data = []
             for fp in self.file_lst:
-                tmp = self.data[fp][section_index][keyword].values
+                file_name = os.path.basename(fp)
+                tmp = self.data[file_name][section_index][keyword].values
                 keyword_data.append(tmp)
             keyword_data = np.array(keyword_data)
             keyword_data = keyword_data.flatten()

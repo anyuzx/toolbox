@@ -155,11 +155,11 @@ def mergetraj(filelst, foutname, stride, keyword_lst, check):
         for keyword in keyword_lst:
             firstframe[keyword] = traj1.get_frame(0, keyword)
 
-        assert natoms1 == natoms0
+        assert natoms1 == natoms0, "Number of atoms in two trajectories files are not the same."
 
         if check:
             for keyword in keyword_lst:
-                assert np.sum(np.power(firstframe[keyword] - lastframe[keyword], 2.0)) <= 2.0
+                assert np.sum(np.power(firstframe[keyword] - lastframe[keyword], 2.0)) <= 2.0, "The last snapshot of first trajectory is as the same as the first snapshot of the second trajectory."
 
         # resize dataset
         for keyword in keyword_lst:

@@ -40,3 +40,6 @@ test_*
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+.idea
+.ropeproject

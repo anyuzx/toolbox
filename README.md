@@ -102,3 +102,13 @@ python dump2h5md.py lammps_custom_dump_file H5MD_formatted_file.h5 -s 100
 ```
 
 Use argument `--help` for additional information.
+
+#### `mergetraj.py`
+
+This script merge multiple H5MD trajectory or other H5MD formatted files into one file. It takes 3 arguments and 2 optional arguments.
+
+```bash
+python mergetraj.py -in traj1.h5 traj2.h5 traj3.h5 -out traj.h5 -c -k position species -s 10
+```
+
+The argument `-in` specify the H5MD files used for merging. `-out` provides the name of output file. `-c` enable the continuity check of files, i.e. whether the last frame of the previous file is as the same as the first frame of the following file. `-k` provides the keyword you want to store in the output file. In the above example, we provide `position` and `species` to the argument `-k`, thus the merged file will contains these information. `-s` is the stride argument. You can use `--help` to see the information.

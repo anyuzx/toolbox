@@ -9,7 +9,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from H5MD_Analysis import contactmap
 
-def compute_dynamic_cmap(traj_file, cutoff, stride, logfile):
+def compute_dynamic_cmap(traj_file, cutoff, stride, logfile, begin=None, terminate=None):
 	traj_file_basename_without_extension = os.path.basename(os.path.splitext(traj_file)[0])
 	try:
 		traj = h5py.File(traj_file, 'r')
@@ -22,7 +22,14 @@ def compute_dynamic_cmap(traj_file, cutoff, stride, logfile):
 		sys.stdout = open(os.devnull, 'w')
 
 	nsnapshots = traj['particles/all/position/time'].shape[0]
-	snapshot_lst = np.arange(0, nsnapshots, stride)
+	if begin is None and terminate is None:
+		snapshot_lst = np.arange(0, nsnapshots, stride)
+	elif begin is not None and terminate is None:
+		snapshot_lst = np.arange(begin, nsnapshots, stride)
+	elif begin is not None and terminate is not None:
+		snapshot_lst = np.arange(begin, terminate, stride)
+	elif begin is None and terminate is not None:
+		snapshot_lst = np.arange(0, terminate, stride)
 
 	sys.stdout.write('Starting to computing...\n')
 	for s in snapshot_lst:
@@ -38,8 +45,10 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='compute contact map from a trajectory file at different time steps.')
 	parser.add_argument('-in', '--input', help='LAMMPS dump files path. Need to be in H5MD format.', dest='input')
 	parser.add_argument('-c', '--cutoff', help='Specify the value of cutoff for determing contacts.', dest='cutoff', type=float)
+	parser.add_argument('-b', '--begin', help='Specipy the starting frames.', dest='begin', type=int)
+	parser.add_argument('-t', '--terminate', help='Specify the ending frames.', dest='terminate', type=int)
 	parser.add_argument('-s', '--stride', help='Output contact map every this many snapshots.', dest='stride', type=int)
 	parser.add_argument('-l', '--log', help='Output information to log file.', dest='logfile')
 	args = parser.parse_args()
 
-	compute_dynamic_cmap(args.input, args.cutoff, args.stride, args.logfile)
+	compute_dynamic_cmap(args.input, args.cutoff, args.stride, args.logfile, args.begin, arge.terminate)

@@ -51,4 +51,4 @@ if __name__ == '__main__':
 	parser.add_argument('-l', '--log', help='Output information to log file.', dest='logfile')
 	args = parser.parse_args()
 
-	compute_dynamic_cmap(args.input, args.cutoff, args.stride, args.logfile, args.begin, arge.terminate)
+	compute_dynamic_cmap(args.input, args.cutoff, args.stride, args.logfile, args.begin, args.terminate)

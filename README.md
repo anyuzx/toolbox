@@ -1,6 +1,6 @@
-## README
+## DESCRIPTION
 
-This is a collection of several scripts and modules I use in my daily research.
+This repository is a collection of some scripts and modules I frequently use in my daily research.
 
 -----
 
@@ -20,7 +20,7 @@ In the above code, specify the chromosome using argument `chrom`. The range and 
 To read contact map, do the following
 
 ```python
-cmap.read('/Users/gs27722/Desktop/Chr5_145870001_157870001_SC/model_1/temp_dependence/analysis/CONTACTMAP/Chr5_T0.60_SC_traj_cmap_avg.npy')
+cmap.read('my_cmap.npy')
 ```
 
 `read` method can read contactmap file in `.npy` formart or normal ASCII format. After successfully load the contactmap, the contact map matrix can be retrieved by class attribute `cmap.map`. To normalize the contact map, use the method `self.normalize()`

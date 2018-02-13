@@ -54,7 +54,10 @@ with open(args.lammps_custom_dump, 'w') as f:
 		f.write('{} {}\n'.format(ylo, yhi))
 		f.write('{} {}\n'.format(zlo, zhi))
 
-		type_lst = h5md_traj['particles/all/species/value'][s]
+		try:
+			type_lst = h5md_traj['particles/all/species/value'][s]
+		except KeyError:
+			type_lst = np.ones(natoms, dtype=np.int)
 		snapshot = np.hstack((np.arange(1,natoms+1).reshape(natoms, 1), type_lst.reshape(natoms, 1), position))
 
 		f.write('ITEM: ATOMS id type x y z\n')

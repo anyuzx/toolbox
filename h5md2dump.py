@@ -10,8 +10,15 @@ parser = argparse.ArgumentParser(description='Convert Lammps H5MD format dump fi
                                  IMPORTANT NOTES:Only used for simulation where number of particles does not change.')
 parser.add_argument('lammps_hdf5_dump', help='H5MD file.')
 parser.add_argument('lammps_custom_dump', help='Lammps custom dump file.')
+parser.add_argument('-s', '--stride', help='write H5MD file every this many snapshots.', \
+                    dest='stride', type=int)
 parser.add_argument('-l', '--log',  help='output to log files.',dest='logfile')
 args = parser.parse_args()
+
+if args.stride is None:
+    stride = 1
+else:
+    stride = args.stride
 
 start_time = time.time()
 # redirect stdout to log file if specified
@@ -26,7 +33,7 @@ nsnapshots = h5md_traj['particles/all/position/value'].shape[0]
 natoms = h5md_traj['particles/all/position/value'].shape[1]
 
 with open(args.lammps_custom_dump, 'w') as f:
-	for s in range(nsnapshots):
+	for s in range(0, nsnapshots, stride):
 		position = h5md_traj['particles/all/position/value'][s]
 
 		f.write('ITEM: TIMESTEP\n')

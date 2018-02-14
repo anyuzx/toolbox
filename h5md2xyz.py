@@ -32,7 +32,7 @@ h5md_traj = h5py.File(args.lammps_hdf5_dump, 'r')
 nsnapshots = h5md_traj['particles/all/position/value'].shape[0]
 natoms = h5md_traj['particles/all/position/value'].shape[1]
 
-with open(args.lammps_custom_dump, 'w') as f:
+with open(args.xyz_dump, 'w') as f:
 	for s in range(0, nsnapshots, stride):
 		position = h5md_traj['particles/all/position/value'][s]
 

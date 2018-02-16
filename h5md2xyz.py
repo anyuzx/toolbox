@@ -33,9 +33,9 @@ sys.stdout.flush()
 h5md_traj = h5py.File(args.lammps_hdf5_dump, 'r')
 nsnapshots = h5md_traj['particles/all/position/value'].shape[0]
 
-if args.index is None:
-	natoms = h5md_traj['particles/all/position/value'].shape[1]
-else:
+natoms = h5md_traj['particles/all/position/value'].shape[1]
+
+if args.index is not None:
 	assert args.index[1] >= args.index[0], "first index must not be larger than the second index."
 	assert args.index[1] <= natoms, "index larger than the total number of atoms."
 	natoms = args.index[1] - args.index[0] + 1

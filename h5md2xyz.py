@@ -12,6 +12,8 @@ parser.add_argument('lammps_hdf5_dump', help='H5MD file.')
 parser.add_argument('xyz_dump', help='xyz format file.')
 parser.add_argument('-s', '--stride', help='write H5MD file every this many snapshots.', \
                     dest='stride', type=int)
+parser.add_argument('-i', '--index', help='write H5MD file for atoms with index between two numbers. index starts from one not zero.',\
+					dest='index', type=int, nargs = 2)
 parser.add_argument('-l', '--log',  help='output to log files.',dest='logfile')
 args = parser.parse_args()
 
@@ -30,7 +32,13 @@ sys.stdout.flush()
 
 h5md_traj = h5py.File(args.lammps_hdf5_dump, 'r')
 nsnapshots = h5md_traj['particles/all/position/value'].shape[0]
-natoms = h5md_traj['particles/all/position/value'].shape[1]
+
+if args.index is None:
+	natoms = h5md_traj['particles/all/position/value'].shape[1]
+else:
+	assert args.index[1] >= args.index[0], "first index must not be larger than the second index."
+	assert args.index[1] <= natoms, "index larger than the total number of atoms."
+	natoms = args.index[1] - args.index[0] + 1
 
 with open(args.xyz_dump, 'w') as f:
 	for s in range(0, nsnapshots, stride):
@@ -43,7 +51,10 @@ with open(args.xyz_dump, 'w') as f:
 			type_lst = h5md_traj['particles/all/species/value'][s]
 		except KeyError:
 			type_lst = np.ones(natoms, dtype=np.int)
-		snapshot = np.hstack((np.arange(1,natoms+1).reshape(natoms, 1), position))
+		if args.index is None:
+			snapshot = np.hstack((np.arange(1,natoms+1).reshape(natoms, 1), position))
+		else:
+			snapshot = np.hstack((np.arange(1,natoms+1).reshape(natoms, 1), position[args.index[0]-1:args.index[1]]))
 
 		for item in snapshot:
 			f.write('{} {} {} {}\n'.format(int(item[0]), item[1], item[2], item[3]))

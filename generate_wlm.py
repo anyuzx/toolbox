@@ -31,8 +31,8 @@ def minimize_comparison_wlm(lam, m1, m2, compare_func, *kwargs):
     dmap2 = np.delete(dmap2,[385,386],0)
     dmap2 = np.delete(dmap2,[385,386],1)
 
-    linkage1 = scipy.cluster.hierarchy.linkage(scipy.spatial.distance.squareform(dmap1), method='centroid')
-    linkage2 = scipy.cluster.hierarchy.linkage(scipy.spatial.distance.squareform(dmap2), method='centroid')
+    linkage1 = scipy.cluster.hierarchy.linkage(scipy.spatial.distance.squareform(dmap1), method='ward')
+    linkage2 = scipy.cluster.hierarchy.linkage(scipy.spatial.distance.squareform(dmap2), method='ward')
 
     clm1 = dendrogram2WLM(linkage1)
     clm2 = dendrogram2WLM(linkage2)
@@ -69,11 +69,13 @@ dmap = np.load(fp)
 dmap = dmap + dmap.transpose()
 
 dmap_normalized = _matrixnorm.matrixnorm_mean(np.float32(dmap), 20)
-dmap_normalized += dmap_normalized.T - - np.diag(dmap_normalized.diagonal())
+dmap_normalized = dmap_normalized + dmap_normalized.T - 2.0 * np.diag(dmap_normalized.diagonal())
+#dmap_normalized += dmap_normalized.T - - np.diag(dmap_normalized.diagonal())
 
 diff = scipy.optimize.minimize(minimize_comparison_wlm, 1.0, args=(dmap_normalized, cmap_exp_25kb_resize, Frobenius_norm), \
                                 method='L-BFGS-B',bounds=((10**-8,None),))
-ward_linkage_dmap = scipy.cluster.hierarchy.linkage(scipy.spatial.distance.squareform(diff['x'][0]*dmap_normalized), method='ward')
+#ward_linkage_dmap = scipy.cluster.hierarchy.linkage(scipy.spatial.distance.squareform(diff['x'][0]*dmap_normalized), method='ward')
+ward_linkage_dmap = scipy.cluster.hierarchy.linkage(scipy.spatial.distance.squareform(dmap_normalized), method='ward')
 cophenetic_mtx = dendrogram2WLM(ward_linkage_dmap)
 
 fig, ax = plt.subplots()

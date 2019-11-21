@@ -90,8 +90,8 @@ def get_contact_life_time_wrapper_full(coordinates, cutoff):
     nsteps = distance_array.shape[0]
     natoms = distance_array.shape[1]
 
-    for i in tqdm(range(natoms-2)):
-        for j in range(i+2, natoms):
+    for i in tqdm(range(natoms-args.exclude)):
+        for j in range(i+args.exclude, natoms):
             temp_result1, temp_result2 = get_contact_life_time_full(distance_array[:,i,j], cutoff)
             temp_array = np.repeat(np.array([[i,j]]), len(temp_result1), axis=0)
             temp_result2 = np.hstack((temp_array, \

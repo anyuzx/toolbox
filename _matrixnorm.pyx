@@ -95,7 +95,12 @@ def matrixnorm_zscore(np.ndarray[DTYPE_t, ndim=2] cmap, int a):
         for i in xrange(b):
                 for j in xrange(i):
                         observed = np.sum(cmap[i*a:(i+1)*a,j*a:(j+1)*a])
-                        output[i, j] = (observed-expected[i-j-1])/sigma[i-j-1]
+                        if sigma[i-j-1] == 0.0:
+                                output[i, j] = 0.0
+                                output[j, i] = 0.0
+                        else:
+                                output[i, j] = (observed-expected[i-j-1])/sigma[i-j-1]
+                                output[j, i] = (observed-expected[i-j-1])/sigma[i-j-1]
         return output
 
 @cython.boundscheck(False)

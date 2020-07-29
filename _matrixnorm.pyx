@@ -21,6 +21,24 @@ def matrixnorm(np.ndarray[DTYPE_t,ndim=2] cmap, int a):
                         output[i,j] = np.sum(cmap[i*a:(i+1)*a,j*a:(j+1)*a])
 
         return output
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def matrixnorm_v2(np.ndarray[DTYPE_t, ndim=2] cmap, int a):
+    cdef int i,j
+    cdef int N = cmap.shape[0]
+    # a is normalization factor
+    # note that in this version, a need not be divided by N
+    cdef int b = int(N/a)
+
+    cdef np.ndarray[DTYPE_t, ndim=2] output = np.zeros((b,b),dtype=DTYPE)
+    cdef DTYPE_t tmp
+    for i in xrange(b):
+        for j in xrange(i+1):
+            output[i,j] = np.sum(cmap[i*a:(i+1)*a,j*a:(j+1)*a])
+
+    return output
+
 @cython.boundscheck(False)
 @cython.wraparound(False)
 def matrixnorm_mean(np.ndarray[DTYPE_t,ndim=2] matrix, int a):

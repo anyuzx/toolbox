@@ -1,6 +1,7 @@
 import numpy as np
 import datetime
 import pandas as pd
+import sys
 
 
 __all__ = ['LammpsData']
@@ -105,13 +106,13 @@ class LammpsData:
         self.dataframe['Box'] = pd.DataFrame(np.array([[xlo, xhi, ylo, yhi, zlo, zhi]]),
                                                columns=('xlo','xhi','ylo','yhi','zlo','zhi'))
 
-        for keyword, value in self.sections.iteritems():
+        for keyword, value in self.sections.items():
             if keyword == 'Atoms':
                 if len(self.attribute) == 0:
                     self.dataframe[keyword] = pd.DataFrame(value)
                 else:
                     attribute_lst = [None for i in range(len(self.attribute))]
-                    for k, v in self.attribute.iteritems():
+                    for k, v in self.attribute.items():
                         attribute_lst[v] = k
                     self.dataframe[keyword] = pd.DataFrame(value, columns=attribute_lst)
             else:

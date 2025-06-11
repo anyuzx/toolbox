@@ -12,7 +12,8 @@ def plot_contact_triangle(
     pseudocount: float = 1e-6,
     figsize: float = 6,
     track_data: np.ndarray | None = None,
-    track_height: float = 0.2
+    track_height: float = 0.2,
+    label: str | None = None
 ) -> None:
     """
     Plot a Hi-C/Micro-C contact map as a half-matrix "triangle" with:
@@ -56,6 +57,9 @@ def plot_contact_triangle(
 
     track_height : float, optional (default=0.2)
         Height of the track plot relative to the contact map height.
+
+    label : str, optional (default=None)
+        Text label to be displayed underneath the main diagonal of the contact map.
 
     Returns
     -------
@@ -149,7 +153,7 @@ def plot_contact_triangle(
     ax.set_aspect('equal')
 
     # 10. Label the x-axis; hide the y-axis completely
-    ax.set_xlabel("Genomic coordinate")
+    ax.set_xlabel(f"{label}")
     ax.set_ylabel("")    # we typically don't show y-label for a Hi-C triangle
     ax.set_yticks([])    # remove all y-tick marks
 

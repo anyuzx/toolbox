@@ -12,7 +12,7 @@ def matrixnorm(np.ndarray[DTYPE_t,ndim=2] cmap, int a):
         cdef int i,j
         cdef int N = cmap.shape[0]
         # a is normalization factor
-        cdef int b = N/a
+        cdef int b = N // a
 
         cdef np.ndarray[DTYPE_t,ndim=2] output = np.zeros((b,b),dtype=DTYPE)
         cdef DTYPE_t tmp
@@ -29,7 +29,7 @@ def matrixnorm_v2(np.ndarray[DTYPE_t, ndim=2] cmap, int a):
     cdef int N = cmap.shape[0]
     # a is normalization factor
     # note that in this version, a need not be divided by N
-    cdef int b = int(N/a)
+    cdef int b = N // a
 
     cdef np.ndarray[DTYPE_t, ndim=2] output = np.zeros((b,b),dtype=DTYPE)
     cdef DTYPE_t tmp
@@ -45,7 +45,7 @@ def matrixnorm_mean(np.ndarray[DTYPE_t,ndim=2] matrix, int a):
         cdef int i,j
         cdef int N = matrix.shape[0]
         # a is normalization factor
-        cdef int b = N/a
+        cdef int b = N // a
 
         cdef np.ndarray[DTYPE_t, ndim=2] output = np.zeros((b,b), dtype=DTYPE)
         cdef DTYPE_t tmp
@@ -61,7 +61,7 @@ def matrixnorm_max(np.ndarray[DTYPE_t,ndim=2] matrix, int a):
         cdef int i,j
         cdef int N = matrix.shape[0]
         # a is normalization factor
-        cdef int b = N/a
+        cdef int b = N // a
 
         cdef np.ndarray[DTYPE_t, ndim=2] output = np.zeros((b,b), dtype=DTYPE)
         cdef DTYPE_t tmp
@@ -77,7 +77,7 @@ def matrixnorm_OE(np.ndarray[DTYPE_t, ndim=2] cmap, int a):
         cdef int i,j
         cdef int N = cmap.shape[0]
         # a is normalization factor
-        cdef int b = N/a
+        cdef int b = N // a
 
         cdef np.ndarray[DTYPE_t, ndim=2] output = np.zeros((b,b), dtype=DTYPE)
         cdef np.ndarray[DTYPE_t, ndim=1] expected = np.zeros(b-1, dtype=DTYPE)
@@ -97,7 +97,7 @@ def matrixnorm_OE(np.ndarray[DTYPE_t, ndim=2] cmap, int a):
 def matrixnorm_zscore(np.ndarray[DTYPE_t, ndim=2] cmap, int a):
         cdef int i, j
         cdef int N = cmap.shape[0]
-        cdef int b = N/a
+        cdef int b = N // a
 
         cdef np.ndarray[DTYPE_t, ndim=2] output = np.zeros((b,b), dtype=DTYPE)
         cdef np.ndarray[DTYPE_t, ndim=1] expected = np.zeros(b-1, dtype=DTYPE)

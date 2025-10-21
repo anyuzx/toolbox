@@ -234,3 +234,42 @@ def compute_monomer_average_msd_log(traj, num_lags=50):
     
     msd_log_array = np.column_stack((dt_candidates, msd_log))
     return msd_log_array
+
+def coarse_grain_matrix(mat, block_size, method='mean'):
+    """
+    Coarse-grain a square matrix by reducing non-overlapping blocks to single values.
+
+    Parameters
+    ----------
+    mat : np.ndarray
+        Input square matrix (2D array).
+    block_size : int
+        Size of the square block for coarse-graining.
+    method : str
+        Reduction method: 'mean', 'sum', 'median', 'min', 'max'.
+
+    Returns
+    -------
+    np.ndarray
+        Coarse-grained matrix.
+    """
+    if mat.shape[0] != mat.shape[1]:
+        raise ValueError("Input matrix must be square.")
+
+    n = mat.shape[0]
+    new_n = n // block_size
+    mat_cg = mat[:new_n*block_size, :new_n*block_size].reshape(new_n, block_size, new_n, block_size)
+    mat_cg = mat_cg.transpose(0,2,1,3).reshape(new_n, new_n, block_size, block_size)
+
+    if method == 'mean':
+        return mat_cg.mean(axis=(2,3))
+    elif method == 'sum':
+        return mat_cg.sum(axis=(2,3))
+    elif method == 'median':
+        return np.median(mat_cg, axis=(2,3))
+    elif method == 'min':
+        return mat_cg.min(axis=(2,3))
+    elif method == 'max':
+        return mat_cg.max(axis=(2,3))
+    else:
+        raise ValueError(f"Unknown method: {method}")

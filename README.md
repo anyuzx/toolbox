@@ -5,6 +5,7 @@ A collection of Python scripts and modules for computational biology and molecul
 ## Table of Contents
 
 - [Overview](#overview)
+- [Quick Links](#quick-links)
 - [Installation](#installation)
 - [Modules](#modules)
   - [contactmap](#contactmap)
@@ -22,6 +23,14 @@ A collection of Python scripts and modules for computational biology and molecul
 
 ---
 
+## Quick Links
+
+- **[QUICK_START.md](QUICK_START.md)** - Get started quickly with common use cases
+- **[INSTALL.md](INSTALL.md)** - Detailed installation instructions and troubleshooting
+- **[CYTHON_EXTENSION_HANDLING.md](CYTHON_EXTENSION_HANDLING.md)** - Understanding optional Cython extensions
+
+---
+
 ## Overview
 
 This repository contains a collection of scripts and modules for:
@@ -35,23 +44,40 @@ This repository contains a collection of scripts and modules for:
 
 ## Installation
 
-### Requirements
+### Quick Start
 
-- Python 3.6+
-- NumPy
-- Pandas
-- Matplotlib
-- Cython (for compilation)
-- pyBigWig (for bigWig file support)
-- h5py (for H5MD format support)
-
-### Build from source
-
+**Full installation with Cython extensions:**
 ```bash
 pip install -e .
 ```
 
-This will build the Cython extensions and install the package in development mode.
+**Minimal installation (basic features only):**
+```python
+# Add to your PYTHONPATH or import directly
+import sys
+sys.path.insert(0, '/path/to/toolbox')
+import toolbox
+```
+
+### Requirements
+
+#### Core Dependencies
+- Python 3.6+
+- NumPy
+- Pandas
+- Matplotlib
+- h5py (for H5MD format support)
+
+#### Optional Dependencies
+- **Cython** (required for contact map normalization features)
+- **pyBigWig** (for bigWig file support in ChIP-seq analysis)
+- **scipy** (for some analysis scripts)
+
+### Cython Extension
+
+The `_matrixnorm` Cython extension provides optimized contact map normalization. The package will work without it, but some `contactmap` methods (`normalize()`, `get_OE()`, `get_zscore()`, `get_PearsonCoeff()`, `get_subchain_contact()`) will not be available.
+
+**See [INSTALL.md](INSTALL.md) for detailed installation instructions and troubleshooting.**
 
 ---
 

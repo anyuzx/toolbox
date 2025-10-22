@@ -5,12 +5,19 @@ from matplotlib import cbook
 from matplotlib.colors import LogNorm
 from matplotlib.colors import Normalize
 import matplotlib.colors as mcolors
-import _matrixnorm
 import pandas as pd
 import datetime
 import sys
 import os
 import argparse
+
+# Try to import the Cython extension, but don't fail if it's not available
+try:
+    import _matrixnorm
+    _HAS_MATRIXNORM = True
+except ImportError:
+    _HAS_MATRIXNORM = False
+    _matrixnorm = None
 
 class contactmap:
     def __init__(self, chrom, start, end, bin_size):
@@ -74,6 +81,12 @@ class contactmap:
         return self.contact_probability
 
     def get_subchain_contact(self, mode='normalize'):
+        if not _HAS_MATRIXNORM:
+            raise ImportError(
+                "The _matrixnorm Cython extension is required for get_subchain_contact(). "
+                "Please build the extension by running: pip install -e . or python setup.py build_ext --inplace"
+            )
+        
         if mode == 'normalize':
             if self.normalized_map is None:
                 raise ValueError('No normalized contact map present\n')
@@ -104,6 +117,12 @@ class contactmap:
         return self.subchain_contact
 
     def normalize(self, norm_factor):
+        if not _HAS_MATRIXNORM:
+            raise ImportError(
+                "The _matrixnorm Cython extension is required for normalize(). "
+                "Please build the extension by running: pip install -e . or python setup.py build_ext --inplace"
+            )
+        
         self.norm_factor = norm_factor
         assert type(norm_factor) == int
         self.normalized_map = _matrixnorm.matrixnorm(self.map, norm_factor)
@@ -111,6 +130,12 @@ class contactmap:
         return self.normalized_map
 
     def get_OE(self, norm_factor):
+        if not _HAS_MATRIXNORM:
+            raise ImportError(
+                "The _matrixnorm Cython extension is required for get_OE(). "
+                "Please build the extension by running: pip install -e . or python setup.py build_ext --inplace"
+            )
+        
         self.norm_factor_OE = norm_factor
         assert type(norm_factor) == int
         self.OE_map = _matrixnorm.matrixnorm_OE(self.map, norm_factor)
@@ -118,6 +143,12 @@ class contactmap:
         return self.OE_map
 
     def get_zscore(self, norm_factor):
+        if not _HAS_MATRIXNORM:
+            raise ImportError(
+                "The _matrixnorm Cython extension is required for get_zscore(). "
+                "Please build the extension by running: pip install -e . or python setup.py build_ext --inplace"
+            )
+        
         self.norm_factor_zscore = norm_factor
         assert type(norm_factor) == int
         self.zscore_map = _matrixnorm.matrixnorm_zscore(self.map, norm_factor)
@@ -125,6 +156,12 @@ class contactmap:
         return self.zscore_map
 
     def get_PearsonCoeff(self, norm_factor):
+        if not _HAS_MATRIXNORM:
+            raise ImportError(
+                "The _matrixnorm Cython extension is required for get_PearsonCoeff(). "
+                "Please build the extension by running: pip install -e . or python setup.py build_ext --inplace"
+            )
+        
         assert type(norm_factor) == int
         self.norm_factor_coeff = norm_factor
         if self.zscore_map is None:

@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import h5py
 import sys
-import _matrixnorm
 import scipy
 import scipy.interpolate
 import scipy.cluster
@@ -10,6 +9,15 @@ from scipy.spatial.distance import pdist, squareform
 
 import matplotlib
 import matplotlib.pyplot as plt
+
+# Try to import the Cython extension, but don't fail if it's not available
+try:
+    import _matrixnorm
+    _HAS_MATRIXNORM = True
+except ImportError:
+    _HAS_MATRIXNORM = False
+    print("Warning: _matrixnorm Cython extension not found. Please build it with: pip install -e .")
+    sys.exit(1)
 
 # convert contact map to distance map
 def cmap2dmap(cmap,exponent):

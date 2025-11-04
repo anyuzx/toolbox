@@ -273,3 +273,63 @@ def coarse_grain_matrix(mat, block_size, method='mean'):
         return mat_cg.max(axis=(2,3))
     else:
         raise ValueError(f"Unknown method: {method}")
+
+def build_contact_map_from_straw(records, resolution, start_pos=None, end_pos=None):
+    """
+    Build contact map from hicstraw.straw() records.
+    
+    Parameters:
+    -----------
+    records : list
+        List of records from hicstraw.straw(), each with binX, binY, counts
+    resolution : int
+        Resolution in bp (e.g., 25000 for 25kb)
+    start_pos : int, optional
+        Start position in bp. If None, will use min(binX, binY)
+    end_pos : int, optional
+        End position in bp. If None, will use max(binX, binY)
+    
+    Returns:
+    --------
+    contact_map : numpy.ndarray
+        Contact matrix
+    bin_positions : numpy.ndarray
+        Array of bin positions in bp
+    """
+    if len(records) == 0:
+        raise ValueError("No records found")
+    
+    # Find the range of bins if not provided
+    if start_pos is None:
+        start_pos = min(min(r.binX for r in records), min(r.binY for r in records))
+    if end_pos is None:
+        end_pos = max(max(r.binX for r in records), max(r.binY for r in records))
+    
+    # Calculate number of bins
+    n_bins = (end_pos - start_pos) // resolution + 1
+    
+    print(f"Building {n_bins} x {n_bins} contact map...")
+    print(f"Genomic range: {start_pos:,} - {end_pos:,} bp")
+    print(f"Resolution: {resolution:,} bp")
+    print(f"Number of records: {len(records):,}")
+    
+    # Initialize contact map
+    contact_map = np.zeros((n_bins, n_bins))
+    
+    # Fill contact map from records
+    for record in tqdm(records, desc="Processing contacts"):
+        # Convert bp positions to bin indices
+        i = (record.binX - start_pos) // resolution
+        j = (record.binY - start_pos) // resolution
+        
+        # Check bounds
+        if 0 <= i < n_bins and 0 <= j < n_bins:
+            contact_map[i, j] = record.counts
+            # Make symmetric (Hi-C matrices are symmetric)
+            if i != j:
+                contact_map[j, i] = record.counts
+    
+    # Create array of bin positions
+    bin_positions = np.arange(start_pos, end_pos + resolution, resolution)[:n_bins]
+    
+    return contact_map, bin_positions

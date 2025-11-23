@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.optimize
 from tqdm import tqdm
+import pandas as pd
 
 def linear_fit(x, a, b):
     """
@@ -333,3 +334,82 @@ def build_contact_map_from_straw(records, resolution, start_pos=None, end_pos=No
     bin_positions = np.arange(start_pos, end_pos + resolution, resolution)[:n_bins]
     
     return contact_map, bin_positions
+
+def generate_contact_matrix(bed_file, contact_file, chrom, region_start, region_end):
+    """
+    Generate a Hi-C contact matrix for a given chromosome and genomic region.
+
+    Parameters:
+        bed_file (str): Path to the BED file. Can have either:
+                        - 3 columns: "chrom", "start", "end" (row number used as index)
+                        - 4 columns: "chrom", "start", "end", "index" (index column used)
+        contact_file (str): Path to the contact file with 3 columns: i, j, contact.
+                            i and j correspond to bin indices from the BED file.
+        chrom (str): Chromosome of interest (e.g., "chr1").
+        region_start (int): Start coordinate of the region.
+        region_end (int): End coordinate of the region.
+
+    Returns:
+        matrix (np.ndarray): 2D NumPy array representing the contact matrix for the specified region.
+        region_bins (pd.DataFrame): DataFrame of the BED file entries (bins) that fall into the region.
+    """
+    # Read the BED file and detect number of columns
+    # First read without column names to check structure
+    bed_df = pd.read_csv(bed_file, sep='\t', header=None)
+    n_cols = bed_df.shape[1]
+    
+    if n_cols == 3:
+        # 3-column BED file: chrom, start, end
+        bed_df.columns = ["chrom", "start", "end"]
+        # Add row index column (0-indexed) - this will be used to map to contact file indices.
+        # Each row in the BED file is unique, so row number serves as the bin index.
+        bed_df["index"] = bed_df.index
+    elif n_cols == 4:
+        # 4-column BED file: chrom, start, end, index
+        bed_df.columns = ["chrom", "start", "end", "index"]
+    else:
+        raise ValueError(f"BED file must have 3 or 4 columns, but found {n_cols} columns.")
+    
+    
+    # Filter bins for the specified chromosome that overlap the region.
+    # Here we consider bins whose 'end' is >= region_start and 'start' is <= region_end.
+    region_bins = bed_df[
+        (bed_df["chrom"] == chrom) &
+        (bed_df["start"] >= region_start) &
+        (bed_df["end"] <= region_end)
+    ].copy()
+    
+    if len(region_bins) == 0:
+        raise ValueError("No bins found in the specified region.")
+    
+    # Get the list of bin indices (row numbers) in the region and sort them.
+    bin_indices = sorted(region_bins["index"].unique())
+    
+    # Create a mapping from the original bin index (row number) to the row/column index in the matrix.
+    index_map = {bin_idx: i for i, bin_idx in enumerate(bin_indices)}
+    
+    # Initialize the matrix with zeros.
+    n = len(bin_indices)
+    matrix = np.zeros((n, n))
+    
+    # Read the contact file.
+    contact_df = pd.read_csv(contact_file, sep='\t', header=None, names=["i", "j", "contact"])
+    
+    # Filter the contacts to only those where both i and j are in the selected bin indices.
+    region_contacts = contact_df[
+        contact_df["i"].isin(bin_indices) & contact_df["j"].isin(bin_indices)
+    ]
+    
+    # Fill the matrix with contact values.
+    for _, row in region_contacts.iterrows():
+        i_bin = row["i"]
+        j_bin = row["j"]
+        contact_val = row["contact"]
+        # Map the original bin indices (row numbers) to matrix indices.
+        i_mat = index_map[i_bin]
+        j_mat = index_map[j_bin]
+        matrix[i_mat, j_mat] = contact_val
+        # Since Hi-C matrices are symmetric, fill in the mirror element.
+        matrix[j_mat, i_mat] = contact_val
+
+    return matrix, region_bins
